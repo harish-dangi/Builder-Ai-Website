@@ -1,6 +1,7 @@
 import express from "express";
-import { createProjectController, runBackgroundGeneration, updateProjectController, deleteProjectController, publishProjectController,getPublishedProjectController } from "../Controllers/project.controller.js"; 
+import { createProjectController, runBackgroundGeneration, updateProjectController, deleteProjectController, publishProjectController,getPublishedProjectController,getAllProjectsController } from "../Controllers/project.controller.js"; 
 import {isAuthenticated} from "../middleware/auth.middleware.js";
+import { chat } from "../Controllers/chat.controller.js";
 
  const Projectrouter = express.Router();
 
@@ -9,6 +10,9 @@ Projectrouter.post("/",isAuthenticated, createProjectController);
 Projectrouter.put("/:projectId",isAuthenticated, updateProjectController);
 Projectrouter.delete("/:projectId",isAuthenticated, deleteProjectController);
 Projectrouter.post("/:projectId/publish",isAuthenticated, publishProjectController);
-Projectrouter.get("/published/:projectId", getPublishedProjectController);
+Projectrouter.get("/published/:projectId",isAuthenticated, getPublishedProjectController);
+Projectrouter.get('/',isAuthenticated,getAllProjectsController)
 
+//chat 
+Projectrouter.post("/:id/chat",chat)
 export default Projectrouter;
