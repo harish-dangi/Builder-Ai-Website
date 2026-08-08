@@ -14,5 +14,7 @@ Projectrouter.get("/published/:projectId",isAuthenticated, getPublishedProjectCo
 Projectrouter.get('/',isAuthenticated,getAllProjectsController)
 
 //chat 
-Projectrouter.post("/:id/chat",chat)
+Projectrouter.post("/:id/chat",isAuthenticated,chat);
+Projectrouter.
+
 export default Projectrouter;
