@@ -56,11 +56,12 @@ export const registerController = async (req, res) => {
       email,
       password: hashedPassword
     });
-
+    console.log(user)
     // Generate JWT
     const token = jwt.sign(
       {
-        id: user._id
+        id: user._id,
+        name:user.name
       },
       process.env.JWT_SECRET_KEY,
       {
@@ -129,7 +130,8 @@ export const loginController = async (req, res) => {
     // Generate JWT Token
     const token = jwt.sign(
       {
-        id: user._id
+        id: user._id,
+        name:user.name
       },
       process.env.JWT_SECRET_KEY,
       {
@@ -185,6 +187,7 @@ export const logoutController = async (req, res) => {
 export const getMeController = async (req, res) => {
   try {
     const user = req.user;
+  
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -195,7 +198,7 @@ export const getMeController = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "User fetched successfully",
-      user,
+      user
     });
   } catch (error) {
     return res.status(500).json({

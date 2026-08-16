@@ -3,9 +3,9 @@
 */
 
 import { object } from "zod";
-import { ProjectModel } from "../Model/Project.model";
-import { reviseProject } from "../Services/ai";
-import { applyOperations } from "../Services/diff";
+import { ProjectModel } from "../Model/Project.model.js";
+import { reviseProject } from "../Services/ai.js";
+import { applyOperations } from "../Services/diff.js";
 
 export const BuildManifest = (files) => {
   const manifest = [];

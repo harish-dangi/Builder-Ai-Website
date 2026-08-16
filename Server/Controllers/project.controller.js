@@ -74,15 +74,11 @@ export const createProjectController = async (req, res) => {
     });
   }
 }
-
-
-
 /**
  * @description: get all projects of a user.
  * @route: GET /api/projects
  * @access: Private
 */
-
 export const getAllProjectsController = async (req, res) => {
   try {
     const userId = req.user._id;

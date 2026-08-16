@@ -1,5 +1,5 @@
 import express from "express";
-import { createProjectController, runBackgroundGeneration, updateProjectController, deleteProjectController, publishProjectController,getPublishedProjectController,getAllProjectsController } from "../Controllers/project.controller.js"; 
+import { createProjectController, runBackgroundGeneration, updateProjectController, deleteProjectController, publishProjectController,getPublishedProjectController,getAllProjectsController,getProjectByIdController } from "../Controllers/project.controller.js"; 
 import {isAuthenticated} from "../middleware/auth.middleware.js";
 import { chat } from "../Controllers/chat.controller.js";
 
@@ -12,9 +12,10 @@ Projectrouter.delete("/:projectId",isAuthenticated, deleteProjectController);
 Projectrouter.post("/:projectId/publish",isAuthenticated, publishProjectController);
 Projectrouter.get("/published/:projectId",isAuthenticated, getPublishedProjectController);
 Projectrouter.get('/',isAuthenticated,getAllProjectsController)
+Projectrouter.get("/:projectId",isAuthenticated,getProjectByIdController)
 
 //chat 
 Projectrouter.post("/:id/chat",isAuthenticated,chat);
-Projectrouter.
+// Projectrouter
 
 export default Projectrouter;

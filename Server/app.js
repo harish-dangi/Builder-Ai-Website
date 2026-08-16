@@ -7,19 +7,19 @@ import Projectrouter from "./Routes/project.route.js";
 
 const  app = express();
 app.use(cookieParser());
-app.use(cors());
+// app.use(cors());
 app.use(express.json())
 
-console.log("process.env.MONGO_UR");
-console.log("process.env.PORT")
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}));
 /**
 * all routes here
 */
 app.use('/api/auth',Authrouter)
 app.use('/api/projects',Projectrouter)
 
-app.get('/',(req,res)=>{
-  res.send("server is live!")
-})
+
 
 export default app;
