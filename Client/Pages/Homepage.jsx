@@ -3,7 +3,9 @@ import { useAppContext } from "../Context/AppContext";
 import Promptinput from "../Components/Promptinput";
 import { homeTags } from "../assets/assets";
 import { useEffect } from "react";
-
+import { useNavigate } from "react-router-dom";
+import {  ArrowRightIcon, ClockIcon, Trash2Icon } from "lucide-react";
+import moment from "moment"
 const Homepage = () => {
   const {
     user,
@@ -15,10 +17,12 @@ const Homepage = () => {
     loadProjects,
     logout,
   } = useAppContext();
+
+  const navigate = useNavigate();
   // console.log(user.id)
   useEffect(() => {
     loadProjects();
-  }, [loadProjects]);
+  }, []);
   return (
     <div className=" h-screen w-full  bg-[url('/bg-img.png')] bg-cover bg-no-repeat text-amber-200 select-none  ">
       <nav className="flex bg-blue-500 items-center justify-between p-7 md:py-3 md:px-5 ">
@@ -46,7 +50,7 @@ const Homepage = () => {
         </div>
         <div  className="flex gap-3 items-center">
           <p>{user?.name}</p>
-          {console.log(user)}
+          
           <button
             onClick={logout}
             className="border rounded-2xl py-2 px-2 bg-amber-200/30  mr-3  
@@ -107,8 +111,35 @@ const Homepage = () => {
                   {projects.length === 1 ? "project " : " projects"}
                 </span>
               </div>
+              <div>
+                {projects.map((p)=>(
+                  <div key={p._id} className="" onClick={()=> navigate(`/builder/${p._id}`)} >
+                    <div>
+                      <p>{p.name}</p>
+                      <div>
+                        <span>
+                          <ClockIcon size={10}/>
+                          {moment(p.updateAt || p.createdAt).fromNow()}
+                        </span>
+                        <span> v{p.version} </span>
+                      </div>
+                    </div>
+                  <div className="">
+                    <button
+                    onClick={(e)=>{
+                      e.stopPropagation();
+                      handleDelete(p._id);
+                    }}>
+                      <Trash2Icon size={14}/>
+                    </button>
+                    <ArrowRightIcon size={14}/>
+                  </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
+
         </div>
       </div>
     </div>

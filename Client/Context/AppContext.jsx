@@ -83,9 +83,8 @@ export const AppContextProvider = ({ children }) => {
         },
         { withCredentials: true },
       );
-
-      setUser(data.user);
-      toast.success("Welcome Back!");
+ 
+      // toast.success("Welcome Back!");
       navigate("/login");
     } catch (err) {
       console.error("Registration Failed:", err);
@@ -111,7 +110,7 @@ export const AppContextProvider = ({ children }) => {
   const loadProjects = async ()=> {
     if(!user) return;
     try{
-      const {data} = await axios.get("http://localhost:4000/api/projects");
+      const {data} = await axios.get("http://localhost:4000/api/projects",{withCredentials:true});
       setProjects(data);
     }catch(err){
       console.error("Failed to list projects:",err);
@@ -193,7 +192,6 @@ export const AppContextProvider = ({ children }) => {
       toast.error(err?.response?.data?.error || "Failed to delete project");
     }
   },[user]);
-
 
   return (
     <AppContext.Provider value={{ 
