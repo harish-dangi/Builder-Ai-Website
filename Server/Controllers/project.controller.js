@@ -40,7 +40,8 @@ export const createProjectController = async (req, res) => {
     });
 
     // Run background generation process
-    runBackgroundGeneration(Project._id.toISOString(), prompt).catch((error) => {
+    runBackgroundGeneration(Project._id.toString(), prompt)                                            
+    .catch((error) => {
       console.error("Background generation error:", error);
     } );
 
@@ -121,7 +122,7 @@ export const getProjectByIdController = async (req, res) => {
 }
     const project = await ProjectModel.findOne({
     _id: projectId,
-    user: userId
+    owner: userId
 });
     if (!project) {
       return res.status(404).json({
@@ -174,6 +175,7 @@ export const runBackgroundGeneration = async (projectId, prompt) => {
 export const updateProjectController = async (req, res) => {
   try {
     const projectId = req.params.id;
+    const userId = req.user._id;
     const {  files } = req.body;
     if(!mongoose.Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({
@@ -188,7 +190,6 @@ export const updateProjectController = async (req, res) => {
       });
     }
 
-    const userId = req.user._id;
     const project = await ProjectModel.findOneAndUpdate(
       { _id: projectId, owner: userId },
       { $set: { files } },
@@ -218,7 +219,7 @@ export const updateProjectController = async (req, res) => {
  */
 
 export const deleteProjectController = async (req, res) => {
-  try {
+  try { 
     const projectId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({
@@ -227,7 +228,7 @@ export const deleteProjectController = async (req, res) => {
       });
     }
     const userId = req.user._id;
-    const result = await ProjectModel.findByIdAndDelete(projectId,{owner: userId});
+    const result = await ProjectModel.findByIdAndDelete( { _id: projectId, owner: userId });
     if (!result) {
       return res.status(404).json({
         success: false,

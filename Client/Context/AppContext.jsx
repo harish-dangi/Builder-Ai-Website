@@ -1,18 +1,12 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import api from "../api/api";
+import  {createContext,useCallback,useEffect, useState,} from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import axios from "axios";
-import { getProjectByIdController } from "../../Server/Controllers/project.controller";
-import { ReceiptRussianRuble } from "lucide-react";
+import { useContext } from "react";
+import { useMemo } from "react";
+import debounce from "lodash.debounce";
 
-const AppContext = createContext();
+export const AppContext = createContext();
 
 export const AppContextProvider = ({ children }) => {
   //AuthState
@@ -23,23 +17,20 @@ export const AppContextProvider = ({ children }) => {
   //states
   const [projects,setProjects] = useState([]);
   const [loadingProjects,setloadingProjects] = useState(true);
-  const [activeProjects,setactiveProjects] = useState(null);
-  const [loadingActiveProjects,setloadingActiveProjects] = useState(true);
+
+  const [activeProject, setActiveProject] = useState(null);
+  const [loadingActiveProject,setloadingActiveProject] = useState(true);
   const [chatLoading,setChatLoading] = useState(false);
   const [generatingProjects,setGeneratingProjects] = useState(false);
   const [activeFile,setactiveFile] = useState("/App.js");
   const [showCode,setshowCode] = useState(false);
 
-  
-
   //Auth Action
   const checkSession = useCallback(async () => {
-    
     try {
       const { data } = await axios.get("http://localhost:4000/api/auth/getme", {
         withCredentials: true,
       });
-      
       setUser(data.user);
     } catch (err) {
       setUser(null);
@@ -50,16 +41,11 @@ export const AppContextProvider = ({ children }) => {
 
   useEffect(() => {
     checkSession();
-  }, [checkSession]);
+  }, []);
 
   const login = async (email, password) => {
     try {
-      const { data } = await axios.post(
-        "http://localhost:4000/api/auth/login",
-        {
-          email,
-          password,
-        },
+      const { data } = await axios.post( "http://localhost:4000/api/auth/login",{ email,password},
         { withCredentials: true },
       );
       setUser(data.user);
@@ -74,17 +60,10 @@ export const AppContextProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      const { data } = await axios.post(
-        "http://localhost:4000/api/auth/register",
-        {
-          name,
-          email,
-          password,
-        },
+      await axios.post("http://localhost:4000/api/auth/register",{name,email,password},
         { withCredentials: true },
       );
- 
-      // toast.success("Welcome Back!");
+      toast.success("Welcome Back!");
       navigate("/login");
     } catch (err) {
       console.error("Registration Failed:", err);
@@ -121,13 +100,12 @@ export const AppContextProvider = ({ children }) => {
   }
 
   const loadProject = async(id, silent = false)=>{
-    console.log(user)
     if(!user) return;
     if(!silent) setloadingActiveProjects(true);
 
     try{
       const {data} = await axios.get(`http://localhost:4000/api/projects/${id}`);
-      setactiveProjects(data);
+      setActiveProject(data);
       //Default file selection
       const files = Object.keys(data.files);
       if(files.length > 0){
@@ -150,19 +128,19 @@ export const AppContextProvider = ({ children }) => {
 
   //Automatically poll active project status if generating or pending
   useEffect(()=>{
-    if(!activeProjects?._id || !user) return;
-    const isOngoing = activeProjects.status === "generating" || activeProjects.status === "pending" || activeProjects.status === "revising";
+    if(!activeProject?._id || !user) return;
+    const isOngoing = activeProject.status === "generating" || activeProject.status === "pending" || activeProject.status === "revising";
 
     if(isOngoing){
       setChatLoading(true);
       const interval = setInterval(() => {
-        loadProjects(activeProjects._id,true);
+        loadProject(activeProject._id,true);
       }, 2000);
       return ()=> clearInterval(interval);
     }else{
       setChatLoading(false);
     }
-  },[activeProjects?._id,activeProjects?.status,loadProjects,user]);
+  },[activeProject?._id,activeProject?.status,loadProject,user]);
 
   const handleGenerate = useCallback(async (prompt)=>{
     if(!user) return;
@@ -193,16 +171,56 @@ export const AppContextProvider = ({ children }) => {
     }
   },[user]);
 
+  const handleChat = useCallback(async (prompt)=>{
+    if(!user || !activeProject) return;
+    setChatLoading(true);
+    try{
+      const {data} = await axios.post(`http://localhost:4000/api/projects/${activeProject._id}/chat`,{prompt});
+      setActiveProject(data);
+      if(data.errors && data.errors.length > 0){
+        toast.error(`${data.errors.length} revisions patch failed. Please check the chat for details.`);
+      }else{
+        toast.success(`Updated to version ${data.version} successfully!`);
+      }
+    }catch(err){
+      console.error("Failed to chat with AI:",err);
+      toast.error(err?.response?.data?.error || "Failed to chat with AI");
+    }finally{
+      setChatLoading(false);
+    }
+  },[user, activeProject]);
+
+  const debounceSave = useMemo(() => debounce(async (projectId, files) => {
+    try {
+      await axios.put(`http://localhost:4000/api/projects/${projectId}/files`, { files });
+    } catch (err) {
+      console.error("Failed to save project files:", err);
+      toast.error(err?.response?.data?.error || "Failed to save project files");
+    }
+  }, 1000), []);
+
+  useEffect(() => {
+   return () => {
+      debounceSave.cancel();
+    }
+  }, [ debounceSave]);
+
+  const updateProjectFiles = useCallback(( files) => {
+    if (!activeProject || !user) return;
+    debounceSave(activeProject._id, files);
+  }, [activeProject, user, debounceSave]);
+
   return (
     <AppContext.Provider value={{ 
       user, 
       loadingUser, 
       login, 
+      logout,
       register,
       projects,
       loadingProjects,
-      activeProjects,
-      loadingActiveProjects,
+      activeProject,
+      loadingActiveProject,
       chatLoading,
       generatingProjects,
       activeFile,
@@ -212,7 +230,9 @@ export const AppContextProvider = ({ children }) => {
       handleDelete,
       handleGenerate,
       loadProject,
-      loadProjects
+      loadProjects,
+      handleChat,
+      updateProjectFiles
       }}>
       {children}
     </AppContext.Provider>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import  { useState } from "react";
 import LoginLeft from "../Components/LoginLeft";
 import { Link } from "react-router-dom";
 import { EyeIcon, EyeOffIcon } from "lucide-react";
@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 const Authpage = ({ mode }) => {
 
   const navigate = useNavigate();
-  const {login,register,user,loginUser} = useAppContext();
+  const {login,register} = useAppContext();
   // console.log(user)
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);

@@ -8,7 +8,7 @@ import Projectrouter from "./Routes/project.route.js";
 const  app = express();
 app.use(cookieParser());
 // app.use(cors());
-app.use(express.json())
+app.use(express.json());
 
 app.use(cors({
   origin: "http://localhost:5173",
@@ -17,8 +17,8 @@ app.use(cors({
 /**
 * all routes here
 */
-app.use('/api/auth',Authrouter)
-app.use('/api/projects',Projectrouter)
+app.use('/api/auth',Authrouter);
+app.use('/api/projects',Projectrouter);
 
 
 

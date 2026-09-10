@@ -3,12 +3,11 @@ import { generateObject } from 'ai';
 import pMap from "p-map";
 import { FileCodeSchema, FilePlanSchema, RevisionResultSchema } from './aiSchemas.js';
 import { buildFileCodeSystem, FILE_PLAN_SYSTEM, REVISE_SYSTEM } from './prompts.js';
-import { el } from 'zod/v4/locales';
 import { normalizeContent } from './contentNormalizer.js';
 import { validateAndFixCode, validateRevisionContent } from './codeValidator.js';
 
 // --- OpenRouter Model Client Setup ---
-const MODEL = process.env.OPENROUTER_MODEL || "openrouter/free";
+const MODEL = process.env.OPENROUTER_MODEL_NAME || "openrouter/free";
 const MAX_CONCURRENCY = parseInt(process.env.AI_MAX_CONCURRENCY || "6", 10)
 
 const openrouter = createOpenAI({
@@ -21,9 +20,7 @@ const model = openrouter(MODEL);
 // Generate a single file's code
 async function generateSingleFile(file, allFiles, prompt, alreadyGeneratedFiles) {
     const system = buildFileCodeSystem(allFiles, alreadyGeneratedFiles);
-
-    const userMsg = `Project: ${prompt}\n\nWrite the complete code for: ${file.path}\nPurpose: ${file.description}`;
-
+    const userMsg = `Project: ${prompt}\n\nWrite the complete code for: ${file.path} \n Purpose: ${file.description}`;
     console.log(`[AI] Creating file: ${file.path}...`);
     const { object } = await generateObject({
         model,
@@ -32,23 +29,16 @@ async function generateSingleFile(file, allFiles, prompt, alreadyGeneratedFiles)
         prompt: userMsg,
         maxRetries: 2,
     })
-
     let code = normalizeContent(object.code);
-
     if (code.trim().length === 0) {
         throw new Error("Generated code is empty after normalization");
     }
-
     // Apply post-generation validation and auto-fixing
-     
     const validation = validateAndFixCode(code, file.path, { allPlannedFiles: allFiles });
-
     code = validation.code;
-
     if (validation.warnings.length > 0) {
         console.log(`[Validator] Code adjustments for ${file.path}:\n  - ${validation.warnings.join("\n  - ")}`);
     }
-
     console.log(`[AI] Created file: ${file.path} (${code.length} chars)`);
     return { path: file.path, code }
 }

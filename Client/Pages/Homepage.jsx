@@ -1,11 +1,12 @@
-import React from "react";
-import { useAppContext } from "../Context/AppContext";
+import { useContext } from "react";
+import { AppContext} from "../Context/AppContext";
 import Promptinput from "../Components/Promptinput";
 import { homeTags } from "../assets/assets";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {  ArrowRightIcon, ClockIcon, Trash2Icon } from "lucide-react";
-import moment from "moment"
+import { ArrowRightIcon, ClockIcon, Trash2Icon } from "lucide-react";
+import moment from "moment";
+
 const Homepage = () => {
   const {
     user,
@@ -16,7 +17,7 @@ const Homepage = () => {
     handleGenerate,
     loadProjects,
     logout,
-  } = useAppContext();
+  } = useContext(AppContext);
 
   const navigate = useNavigate();
   // console.log(user.id)
@@ -48,9 +49,9 @@ const Homepage = () => {
             )}
           </span>
         </div>
-        <div  className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center">
           <p>{user?.name}</p>
-          
+
           <button
             onClick={logout}
             className="border rounded-2xl py-2 px-2 bg-amber-200/30  mr-3  
@@ -75,13 +76,13 @@ const Homepage = () => {
             website instantly. No coding required.
           </p>
           {/* Prompt input with glassmorphic variant */}
-          <div>
+          <div >
             <Promptinput
               onSubmit={handleGenerate}
               loading={generatingProjects}
               placeholder="Create a portfolio website..."
               variant="glass"
-              autoFocus
+              
             />
           </div>
           {/* scrolling marquee */}
@@ -112,34 +113,38 @@ const Homepage = () => {
                 </span>
               </div>
               <div>
-                {projects.map((p)=>(
-                  <div key={p._id} className="" onClick={()=> navigate(`/builder/${p._id}`)} >
+                {projects.map((p) => (
+                  <div
+                    key={p._id}
+                    className=""
+                    onClick={() => navigate(`/builder/${p._id}`)}
+                  >
                     <div>
                       <p>{p.name}</p>
                       <div>
                         <span>
-                          <ClockIcon size={10}/>
+                          <ClockIcon size={10} />
                           {moment(p.updateAt || p.createdAt).fromNow()}
                         </span>
                         <span> v{p.version} </span>
                       </div>
                     </div>
-                  <div className="">
-                    <button
-                    onClick={(e)=>{
-                      e.stopPropagation();
-                      handleDelete(p._id);
-                    }}>
-                      <Trash2Icon size={14}/>
-                    </button>
-                    <ArrowRightIcon size={14}/>
-                  </div>
+                    <div className="">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(p._id);
+                        }}
+                      >
+                        <Trash2Icon size={14} />
+                      </button>
+                      <ArrowRightIcon size={14} />
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           )}
-
         </div>
       </div>
     </div>

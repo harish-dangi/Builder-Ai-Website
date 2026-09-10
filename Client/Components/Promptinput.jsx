@@ -1,28 +1,13 @@
 import React, { useEffect, useRef ,useState } from "react";
-import {
-  ArrowRightIcon,
-  CloudUploadIcon,
-  Loader2Icon,
-  Mic2Icon,
-  MicIcon,
-} from "lucide-react";
+import {ArrowRightIcon,CloudUploadIcon,Loader2Icon, MicIcon,} from "lucide-react";
 
-const Promptinput = ({
-  onSubmit,
-  loading = false,
-  placeholder = "Describe the website you want to build....",
-  large = false,
-  autoFocus = false,
-  variant = "default",
-}) => {
+const Promptinput = ({onSubmit,loading = false, placeholder = "Describe the website you want to build....",     large = false, variant = "default"}) => {
   const [value, setValue] = useState("");
   const textareaRef = useRef(null);
 
   useEffect(() => {
-    if (autoFocus && textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, [autoFocus]);
+    textareaRef.current?.focus();
+  }, []);
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
@@ -40,8 +25,8 @@ const Promptinput = ({
   };
   if (variant === "glass") {
     return (
-      <form className=" bg-amber-50/30 rounded-2xl p-3 md:w-130 w-70  border hover:shadow-[1px_3px_23px_1px] mt-3 duration-500 transition-all shadow-black">
-        <textarea
+      <form className=" bg-amber-50/30 rounded-2xl p-3 md:w-90 w-70  border hover:shadow-[1px_3px_23px_1px] mt-3 duration-500 transition-all shadow-black ">
+        <textarea 
           ref={textareaRef}
           placeholder={placeholder}
           value={value}
@@ -75,7 +60,7 @@ const Promptinput = ({
   }
 
   return (
-    <div className={`bg-white  border-zinc-300 rounded-xl flex items-end gap-2 focus-within:ring-1 focus-within:ring-zinc-300 transition ${large? "p-4":"p-3"}`}>
+    <div className={`bg-white/25  border-zinc-300 rounded-xl flex items-end gap-2 focus-within:ring-1 focus-within:ring-zinc-300 transition ${large? "p-4":"p-3"}`}>
       <textarea
         ref={textareaRef}
         placeholder={placeholder}

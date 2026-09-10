@@ -2,7 +2,6 @@
  * @route Post /api/projects/:id/chat
 */
 
-import { object } from "zod";
 import { ProjectModel } from "../Model/Project.model.js";
 import { reviseProject } from "../Services/ai.js";
 import { applyOperations } from "../Services/diff.js";
@@ -19,7 +18,7 @@ export const chat = async (req, res) => {
   const { prompt } = req.body;
   const userId = req.user._id;
   if (!prompt || typeof prompt !== "string") {
-    return res.status(400).json({
+    return res.status(404).json({
       message: "prompt not found"
     })
   }
@@ -44,7 +43,7 @@ export const chat = async (req, res) => {
 
     //includes all file contents so the ai can accurate search/replace
     const relevantFiles = {};
-    for (const [path, entry] of Object.entries(files)) {
+    for (const [path, entry] of Object.entries(project.files)) {
       relevantFiles[path] = entry.content;
     }
     //Recent messages for context (last 4 max)
