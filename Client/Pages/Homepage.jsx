@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { AppContext} from "../Context/AppContext";
+import { AppContext } from "../Context/AppContext";
 import Promptinput from "../Components/Promptinput";
 import { homeTags } from "../assets/assets";
 import { useEffect } from "react";
@@ -11,19 +11,21 @@ const Homepage = () => {
   const {
     user,
     projects,
-    loadingProjects,
+    // loadingProjects,
     generatingProjects,
     handleDelete,
     handleGenerate,
     loadProjects,
     logout,
+    // loadProject
   } = useContext(AppContext);
 
   const navigate = useNavigate();
-  // console.log(user.id)
+
   useEffect(() => {
     loadProjects();
-  }, []);
+  }, [loadProjects]);
+
   return (
     <div className=" h-screen w-full  bg-[url('/bg-img.png')] bg-cover bg-no-repeat text-amber-200 select-none  ">
       <nav className="flex bg-blue-500 items-center justify-between p-7 md:py-3 md:px-5 ">
@@ -76,13 +78,12 @@ const Homepage = () => {
             website instantly. No coding required.
           </p>
           {/* Prompt input with glassmorphic variant */}
-          <div >
+          <div>
             <Promptinput
               onSubmit={handleGenerate}
               loading={generatingProjects}
               placeholder="Create a portfolio website..."
               variant="glass"
-              
             />
           </div>
           {/* scrolling marquee */}
@@ -101,49 +102,328 @@ const Homepage = () => {
             </div>
           </div>
           {/* All Projects */}
-          {!loadingProjects && projects.length > 0 && (
-            <div className="mt-12 w-full">
-              <div className="flex items-center justify-between pb-3 mb-3 border-b border-white/10">
-                <p className="text-xs font-medium uppercase text-zinc-100 tracking-widest">
-                  All Projects
-                </p>
-                <span>
-                  {projects.length}{" "}
-                  {projects.length === 1 ? "project " : " projects"}
-                </span>
+          {/* All Projects */}
+          {/* ================= ALL PROJECTS ================= */}
+          {projects.length > 0 && (
+            <section className="mt-16 w-full max-w-5xl mx-auto px-4 pb-20">
+              {/* Section Header */}
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-7">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
+                      Your Projects
+                    </h2>
+
+                    <span
+                      className="
+            inline-flex items-center justify-center
+            min-w-7 h-7 px-2
+            rounded-full
+            bg-zinc-900
+            text-white
+            text-xs font-semibold
+          "
+                    >
+                      {projects.length}
+                    </span>
+                  </div>
+
+                  <p className="mt-1.5 text-sm text-zinc-500">
+                    Continue building and managing your websites.
+                  </p>
+                </div>
+
+                {/* View all */}
+                <div
+                  className="
+        flex items-center gap-2
+        text-xs font-medium
+        text-zinc-400
+      "
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  {projects.length === 1
+                    ? "1 project"
+                    : `${projects.length} projects`}
+                </div>
               </div>
-              <div>
+
+              {/* ================= PROJECT GRID ================= */}
+              <div
+                className="
+      grid
+      grid-cols-1
+      md:grid-cols-2
+      gap-4
+    "
+              >
                 {projects.map((p) => (
                   <div
                     key={p._id}
-                    className=""
                     onClick={() => navigate(`/builder/${p._id}`)}
+                    className="
+            group
+            relative
+            overflow-hidden
+            cursor-pointer
+
+            rounded-2xl
+            border border-zinc-200
+            bg-white
+
+            p-5
+
+            shadow-sm
+            transition-all
+            duration-300
+
+            hover:-translate-y-1
+            hover:border-zinc-300
+            hover:shadow-xl
+          "
                   >
-                    <div>
-                      <p>{p.name}</p>
-                      <div>
-                        <span>
-                          <ClockIcon size={10} />
-                          {moment(p.updateAt || p.createdAt).fromNow()}
-                        </span>
-                        <span> v{p.version} </span>
+                    {/* Top gradient glow */}
+                    <div
+                      className="
+            absolute
+            -top-20
+            -right-20
+            h-40
+            w-40
+            rounded-full
+            bg-indigo-500/10
+            blur-3xl
+            transition-all
+            duration-500
+            group-hover:bg-indigo-500/20
+          "
+                    />
+
+                    {/* ================= TOP ================= */}
+                    <div
+                      className="
+            relative
+            flex
+            items-start
+            justify-between
+          "
+                    >
+                      {/* Project Icon + Name */}
+                      <div className="flex items-center gap-4 min-w-0">
+                        {/* Icon */}
+                        <div
+                          className="
+                flex
+                h-12
+                w-12
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+
+                bg-gradient-to-br
+                from-indigo-500
+                via-violet-500
+                to-fuchsia-500
+
+                shadow-lg
+                shadow-indigo-500/20
+
+                transition-transform
+                duration-300
+                group-hover:scale-105
+              "
+                        >
+                          <div
+                            className="
+                  h-5
+                  w-5
+                  rounded-md
+                  border-2
+                  border-white/90
+                  rotate-3
+                "
+                          />
+                        </div>
+
+                        {/* Name */}
+                        <div className="min-w-0">
+                          <h3
+                            className="
+                  truncate
+                  text-sm
+                  font-semibold
+                  text-zinc-900
+
+                  transition-colors
+                  duration-200
+
+                  group-hover:text-indigo-600
+                "
+                          >
+                            {p.name || "Untitled Project"}
+                          </h3>
+
+                          <p
+                            className="
+                  mt-1
+                  text-xs
+                  text-zinc-400
+                "
+                          >
+                            Website project
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Arrow */}
+                      <div
+                        className="
+              flex
+              h-9
+              w-9
+              shrink-0
+              items-center
+              justify-center
+
+              rounded-lg
+              border
+              border-zinc-200
+              bg-zinc-50
+
+              text-zinc-400
+
+              transition-all
+              duration-300
+
+              group-hover:border-indigo-200
+              group-hover:bg-indigo-50
+              group-hover:text-indigo-600
+              group-hover:translate-x-1
+            "
+                      >
+                        <ArrowRightIcon size={15} />
                       </div>
                     </div>
-                    <div className="">
+
+                    {/* ================= DIVIDER ================= */}
+                    <div
+                      className="
+            relative
+            my-5
+            h-px
+            bg-zinc-100
+          "
+                    />
+
+                    {/* ================= BOTTOM ================= */}
+                    <div
+                      className="
+            relative
+            flex
+            items-center
+            justify-between
+          "
+                    >
+                      {/* Metadata */}
+                      <div
+                        className="
+              flex
+              items-center
+              gap-4
+              text-xs
+              text-zinc-400
+            "
+                      >
+                        {/* Updated */}
+                        <span className="flex items-center gap-1.5">
+                          <ClockIcon size={12} />
+
+                          {moment(
+                            p.updatedAt || p.updateAt || p.createdAt,
+                          ).fromNow()}
+                        </span>
+
+                        {/* Divider */}
+                        <span
+                          className="
+                h-1
+                w-1
+                rounded-full
+                bg-zinc-300
+              "
+                        />
+
+                        {/* Version */}
+                        <span
+                          className="
+                rounded-md
+                bg-zinc-100
+                px-2
+                py-1
+                font-medium
+                text-zinc-500
+              "
+                        >
+                          v{p.version || 1}
+                        </span>
+                      </div>
+
+                      {/* Delete */}
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDelete(p._id);
                         }}
+                        className="
+                flex
+                h-8
+                w-8
+                items-center
+                justify-center
+
+                rounded-lg
+
+                text-zinc-300
+
+                transition-all
+                duration-200
+
+                hover:bg-red-50
+                hover:text-red-500
+
+                active:scale-90
+              "
+                        title="Delete project"
                       >
                         <Trash2Icon size={14} />
                       </button>
-                      <ArrowRightIcon size={14} />
                     </div>
+
+                    {/* ================= HOVER LINE ================= */}
+                    <div
+                      className="
+            absolute
+            bottom-0
+            left-0
+            h-[2px]
+            w-0
+
+            bg-gradient-to-r
+            from-indigo-500
+            via-violet-500
+            to-fuchsia-500
+
+            transition-all
+            duration-500
+
+            group-hover:w-full
+          "
+                    />
                   </div>
                 ))}
               </div>
-            </div>
+            </section>
           )}
         </div>
       </div>

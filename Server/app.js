@@ -7,7 +7,7 @@ import Projectrouter from "./Routes/project.route.js";
 
 const  app = express();
 app.use(cookieParser());
-// app.use(cors());
+
 app.use(express.json());
 
 app.use(cors({
@@ -19,7 +19,5 @@ app.use(cors({
 */
 app.use('/api/auth',Authrouter);
 app.use('/api/projects',Projectrouter);
-
-
 
 export default app;

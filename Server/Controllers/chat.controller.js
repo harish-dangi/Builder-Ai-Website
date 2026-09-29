@@ -8,15 +8,21 @@ import { applyOperations } from "../Services/diff.js";
 
 export const BuildManifest = (files) => {
   const manifest = [];
-  for (const [path, entry] of Object.entries(files)) {
-    manifest.push({ path, hash: entry.hash, size: entry.content.length });
+
+  for (const [path, content] of Object.entries(files)) {
+    manifest.push({
+      path,
+      size: content.length
+    });
   }
+
   return manifest;
-}
+};
 //send the revision prompt and return updated projects
 export const chat = async (req, res) => {
   const { prompt } = req.body;
-  const userId = req.user._id;
+  const userId = req.user.id;
+  console.log(prompt + userId)
   if (!prompt || typeof prompt !== "string") {
     return res.status(404).json({
       message: "prompt not found"
@@ -31,15 +37,18 @@ export const chat = async (req, res) => {
   }
 
   //set status to revising and save user prompt immedaitely
-  project.status = "revising",
+  project.status = "generating",
   project.messages.push({
     role: "user", content: prompt, timestamp: new Date()
   });
   await project.save();
-
+  console.log("after try catch block")
   try {
+  console.log("before try  block")
+
     //Build compact manifest (path + hash + size) instead of sending all code
     const manifest = BuildManifest(project.files);
+    console.log("MANIFEST:", manifest);
 
     //includes all file contents so the ai can accurate search/replace
     const relevantFiles = {};
@@ -51,7 +60,6 @@ export const chat = async (req, res) => {
       role: m.role,
       content: m.content,
     }))
-
     console.log(`[Ai] Revising project ${project._id}: "${prompt.slice(0, 80)}..." ` + `(${manifest.length} files, manifest ~${JSON.stringify(manifest).length} chars)`);
 
     //call ai with manifest + relevantFiles
@@ -60,7 +68,7 @@ export const chat = async (req, res) => {
 
     //Apply operation to file map
     const { files: updatedFiles, applied, errors } = applyOperations(project.files, result.operations)
-
+  
     if (errors.length > 0) {
       console.warn(`[Diff] Errors applying operations:`, errors)
     }
@@ -87,6 +95,7 @@ export const chat = async (req, res) => {
       project
     })
   } catch (err) {
+
     console.error(`[AI] Revision Error ${err.message}`);
     project.status = "completed";
     await project.save();

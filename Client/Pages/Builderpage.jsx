@@ -5,8 +5,12 @@ import { useAppContext } from "../Context/AppContext";
 import { FileEdit, MessagesSquareIcon } from "lucide-react";
 import ChatPanel from "../Components/ChatPanel";
 import FilePanel from "../Components/FilePanel";
-import Loading from "../Components/Loading.jsx";
 import PreviewPanel from "../Components/PreviewPanel.jsx";
+import AgentProgressDashboard from "../Components/AgentProgressDashboard.jsx";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { exportProjectZip } from "../utils/exportProject.js";
+import PublishModel from "../Components/PublishModel.jsx";
 
 const Builderpage = () => {
   const { id } = useParams();
@@ -14,6 +18,7 @@ const Builderpage = () => {
   const [leftTab, setLeftTab] = useState("chat");
   const [publishing, setPublishing] = useState(false);
   const [publishUrl, setPublishUrl] = useState(null);
+  const [showPublishUrl, setShowPublishUrl] = useState(false);
 
   const {
     activeProject,
@@ -25,55 +30,78 @@ const Builderpage = () => {
     handleChat,
     activeFile,
     setActiveFile,
+    user,
   } = useAppContext();
 
-  console.log(id);
-  console.log(!activeProject);
+  // console.log("id:", id);
   useEffect(() => {
-    if (!id || !activeProject) return;
-    if (
-      activeProject.status === "pending" ||
-      activeProject.status === "generating"
-    ) {
-      const interval = setInterval(() => {
-        loadProject(id, true);
-      }, 1500);
-      return () => clearInterval(interval);
-    }
-  }, [id, activeProject]);
+    if (!id || !user) return;
+
+    loadProject(id);
+  }, [id, user]);
 
   const handleOpenPreview = () => {
     if (!id) return;
     window.open(`/preview/${id}`, "_blank");
   };
+
   const handleDownload = () => {
-    return;
+    if (!activeProject) return;
+    exportProjectZip(activeProject.project);
   };
+
   const handlePublish = async () => {
-    return;
+    if (!id) return;
+    setPublishing(true);
+    try {
+      const response = await axios.post(
+        `http://localhost:4000/api/projects/${id}/publish`,
+        {},
+        {
+          withCredentials: true,
+        },
+      );
+      console.log("🔥 PUBLISH RESPONSE:", response.data);
+      const url = `${window.location.origin}/publish/${id}`;
+      setPublishUrl(url);
+      setShowPublishUrl(true);
+      toast.success("Website published successfully!");
+    } catch (err) {
+      console.log("🔥 PUBLISH ERROR:", err);
+      console.log("🔥 STATUS:", err.response?.status);
+      console.log("🔥 DATA:", err.response?.data);
+
+      toast.error(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Publish failed",
+      );
+    } finally {
+      setPublishing(false);
+    }
   };
-  // if (loadingActiveProjects || !activeProject) {
+  // if (loadingActiveProjects || activeProject.project) {
   //   return <Loading />;
   // }
 
   return (
-    <div className="h-screen  bg-amber-50  ">
+    <div className="flex h-screen flex-col overflow-hidden bg-amber-800">
       <BuilderHeader
-        projectName={activeProject?.name || "AI Website Builder"}
-        version={activeProject?.version || "1.0"}
+        projectName={activeProject?.project.name || "AI Website Builder"}
+        version={activeProject?.project.version || "1.0"}
         showCode={showCode}
         publishing={publishing}
         onToggleShowCode={() => setshowCode(!showCode)}
         onOpenPreview={handleOpenPreview}
         onBagout={logout}
         onDowck={() => navigate("/")}
-        onLonload={handleDownload}
+        onDownload={handleDownload}
         onPublish={handlePublish}
       />
       {/* Main Layout */}
-      <div className="gap-3 mt-3 flex">
+      <div className="mt-2 flex gap-3 overflow-hidden ">
         {/* Left Layout */}
-        <div className="flex flex-col shrink-0 w-100 ">
+        <div className="flex  min-h-0 shrink-0 flex-col">
           {/* Tabs Container */}
 
           <div className="flex items-center gap-1 p-1 rounded-xl w-full justify-between border border-zinc-200">
@@ -105,17 +133,17 @@ const Builderpage = () => {
             </button>
           </div>
 
-          <div className="w-100 h-[calc(100vh-110px)] shrink-0  ">
+          <div className="flex-1 ">
             <div className="h-full border border-zinc-200 rounded-2xl bg-white shadow-sm overflow-hidden">
               {leftTab === "chat" ? (
                 <ChatPanel
-                  messages={activeProject?.messages || []}
+                  messages={activeProject?.project.messages || []}
                   loading={chatLoading}
                   onSend={handleChat}
                 />
               ) : (
                 <FilePanel
-                  files={activeProject?.files || {}}
+                  files={activeProject?.project.files || {}}
                   activeFile={activeFile}
                   onFileSelect={(path) => {
                     setActiveFile(path);
@@ -128,16 +156,27 @@ const Builderpage = () => {
         </div>
         {/* right layout */}
         {/* preview page / code area */}
-        <div className="flex-1  overflow-hidden w-100 bg-amber-600/20">
-          {activeProject?.status === "pending" ||
-          activeProject?.status === "generating" ||
-          activeProject?.status === "failed" ? (
-            <Loading />
+        <div className="flex  min-h-0 min-w-0 w-full overflow-hidden  ">
+          {activeProject?.project.status === "pending" ||
+          activeProject?.project.status === "generating" ||
+          activeProject?.project.status === "failed" ? (
+            <AgentProgressDashboard />
           ) : (
-            <PreviewPanel project={activeProject} activeFile={activeFile} showcode={showCode}/>
+            <PreviewPanel 
+              projectData={activeProject?.project}
+              sandpackFiles={activeProject?.project?.files || {}}
+              activeFile={activeFile}
+              showcode={showCode}
+            />
           )}
         </div>
       </div>
+      {showPublishUrl && (
+        <PublishModel
+          publishUrl={publishUrl}
+          onClose={() => setShowPublishUrl(false)}
+        />
+      )}
     </div>
   );
 };

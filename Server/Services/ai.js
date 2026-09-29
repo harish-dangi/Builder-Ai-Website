@@ -16,148 +16,213 @@ const openrouter = createOpenAI({
 })
 
 const model = openrouter(MODEL);
-
+console.log("MODEL:", MODEL);
+console.log("OPENROUTER KEY LOADED:", !!process.env.OPENROUTER_API_KEY);
 // Generate a single file's code
-async function generateSingleFile(file, allFiles, prompt, alreadyGeneratedFiles) {
-    const system = buildFileCodeSystem(allFiles, alreadyGeneratedFiles);
-    const userMsg = `Project: ${prompt}\n\nWrite the complete code for: ${file.path} \n Purpose: ${file.description}`;
-    console.log(`[AI] Creating file: ${file.path}...`);
-    const { object } = await generateObject({
-        model,
-        schema: FileCodeSchema,
-        system,
-        prompt: userMsg,
-        maxRetries: 2,
-    })
-    let code = normalizeContent(object.code);
-    if (code.trim().length === 0) {
-        throw new Error("Generated code is empty after normalization");
-    }
-    // Apply post-generation validation and auto-fixing
-    const validation = validateAndFixCode(code, file.path, { allPlannedFiles: allFiles });
-    code = validation.code;
-    if (validation.warnings.length > 0) {
-        console.log(`[Validator] Code adjustments for ${file.path}:\n  - ${validation.warnings.join("\n  - ")}`);
-    }
-    console.log(`[AI] Created file: ${file.path} (${code.length} chars)`);
-    return { path: file.path, code }
-}
+// async function generateSingleFile(file, allFiles, prompt, alreadyGeneratedFiles) {
+//     const system = buildFileCodeSystem(allFiles, alreadyGeneratedFiles);
+//     const userMsg = `Project: ${prompt}\n\nWrite the complete code for: ${file.path} \n Purpose: ${file.description}`;
+//     console.log(`[AI] Creating file: ${file.path}...`);
+//     const { object } = await generateObject({
+//         model,
+//         schema: FileCodeSchema,
+//         system,
+//         prompt: userMsg,
+//         maxRetries: 2,
+//     })
+//     let code = normalizeContent(object.code);
+//     if (code.trim().length === 0) {
+//         throw new Error("Generated code is empty after normalization");
+//     }
+//     // Apply post-generation validation and auto-fixing
+//     const validation = validateAndFixCode(code, file.path, { allPlannedFiles: allFiles });
+//     code = validation.code;
+//     if (validation.warnings.length > 0) {
+//         console.log(`[Validator] Code adjustments for ${file.path}:\n  - ${validation.warnings.join("\n  - ")}`);
+//     }
+//     console.log(`[AI] Created file: ${file.path} (${code.length} chars)`);
+//     return { path: file.path, code }
+// }
+async function generateSingleFile(
+  file,
+  allFiles,
+  prompt,
+  alreadyGeneratedFiles
+) {
+  const system = buildFileCodeSystem(
+    allFiles,
+    alreadyGeneratedFiles
+  );
 
+  const userMsg = `
+Project: ${prompt}
+
+Write the complete code for: ${file.path}
+
+Purpose: ${file.description}
+`;
+
+  const { object } = await generateObject({
+    model,
+    schema: FileCodeSchema,
+    system,
+    prompt: userMsg,
+    maxRetries: 2,
+  });
+  let code = normalizeContent(object.code);
+  
+  if (code.trim().length === 0) {
+    throw new Error("Generated code is empty after normalization");
+  }
+
+  const validation = validateAndFixCode(
+    code,
+    file.path,
+    {
+      allPlannedFiles: allFiles
+    }
+  );
+
+  code = validation.code;
+
+  if (validation.warnings.length > 0) {
+    console.log(
+      `[Validator] Code adjustments for ${file.path}:\n  - ${validation.warnings.join("\n  - ")}`
+    );
+  }
+
+  console.log(
+    `[AI] Created file: ${file.path} (${code.length} chars)`
+  );
+
+  return {
+    path: file.path,
+    code
+  };
+}
 // Generate project files: plan first, then build files in order with fallback retries
 export async function generateProject(prompt, callbacks) {
     // Phase 1: Plan
     console.log(`[AI] Phase 1: Planning file structure for: "${prompt.slice(0, 80)}..."`);
-    const { object: plan } = await generateObject({
-        model,
-        schema: FilePlanSchema,
-        system: FILE_PLAN_SYSTEM,
-        prompt: `Plan a React website for: ${prompt}`,
-        maxRetries: 2,
-    });
-
-    if (!plan.files.find((f) => f.path === "/App.js")) {
-        plan.files.unshift({
-            path: "/App.js",
-            description: "Main application entry point",
-            exports: "default App",
-            imports: ["./styles.css"],
-        })
-    }
-
-    if (!plan.files.find((f) => f.path === "/styles.css")) {
-        plan.files.push({
-            path: "/styles.css",
-            description: "Global CSS: Google Font import, keyframe animations, utility classes",
-            exports: "none",
-            imports: [],
-        })
-    }
-
-    if (callbacks?.onPlan) {
-        await callbacks.onPlan(plan)
-    }
-
-    console.log(`[AI] Phase 2: Generating ${plan.files.length} files in parallel (concurrency=${MAX_CONCURRENCY}): ${plan.files.map((f) => f.path).join(", ")}`);
+    try {
+        const { object: plan } = await generateObject({
+            model,
+            schema: FilePlanSchema,
+            system: FILE_PLAN_SYSTEM,
+            prompt: `Plan a React website for: ${prompt}`,
+            maxRetries: 2,
+        });
+        console.log("PLAN GENERATED:");
+        console.log(plan)
 
 
-    const files = {};
-    let pendingFiles = plan.files.map((f) => ({ ...f }));
-
-    const maxRetryRounds = 2;
-
-    for (let round = 0; round <= maxRetryRounds; round++) {
-        if (pendingFiles.length === 0) break;
-
-        if (round > 0) {
-            console.log(
-                `[AI] Retry round ${round}/${maxRetryRounds} for ${pendingFiles.length} failed files: ${pendingFiles.map((f) => f.path).join(", ")}`,
-            );
+        if (!plan.files.find((f) => f.path === "/App.js")) {
+            plan.files.unshift({
+                path: "/App.js",
+                description: "Main application entry point",
+                exports: "default App",
+                imports: ["./styles.css"],
+            })
         }
 
-        const results = await pMap(
-            pendingFiles,
-            async (file) => {
-                try {
-                    if (callbacks?.onFileStart) {
-                        await callbacks.onFileStart(file.path)
-                    }
+        if (!plan.files.find((f) => f.path === "/styles.css")) {
+            plan.files.push({
+                path: "/styles.css",
+                description: "Global CSS: Google Font import, keyframe animations, utility classes",
+                exports: "none",
+                imports: [],
+            })
+        }
 
-                    const singleResult = await generateSingleFile(file, plan.files, prompt, files)
+        if (callbacks?.onPlan) {
+            await callbacks.onPlan(plan)
+        }
 
-                    if (callbacks?.onFileComplete) {
-                        await callbacks.onFileComplete(file.path, singleResult.code)
+        console.log(`[AI] Phase 2: Generating ${plan.files.length} files in parallel (concurrency=${MAX_CONCURRENCY}): ${plan.files.map((f) => f.path).join(", ")}`);
+
+
+        const files = {};
+        let pendingFiles = plan.files.map((f) => ({ ...f }));
+
+        const maxRetryRounds = 2;
+
+        for (let round = 0; round <= maxRetryRounds; round++) {
+            if (pendingFiles.length === 0) break;
+
+            if (round > 0) {
+                console.log(
+                    `[AI] Retry round ${round}/${maxRetryRounds} for ${pendingFiles.length} failed files: ${pendingFiles.map((f) => f.path).join(", ")}`,
+                );
+            }
+
+            const results = await pMap(
+                pendingFiles,
+                async (file) => {
+                    try {
+                        if (callbacks?.onFileStart) {
+                            await callbacks.onFileStart(file.path)
+                        }
+
+                        const singleResult = await generateSingleFile(file, plan.files, prompt, files)
+
+                        if (callbacks?.onFileComplete) {
+                            await callbacks.onFileComplete(file.path, singleResult.code)
+                        }
+                        return { success: true, file, result: singleResult }
+                    } catch (err) {
+                        return { success: false, file, error: err };
                     }
-                    return { success: true, file, result: singleResult }
-                } catch (err) {
-                    return { success: false, file, error: err };
+                },
+                { concurrency: MAX_CONCURRENCY },
+            )
+
+            const failedFiles = [];
+            for (const entry of results) {
+                if (entry.success) {
+                    const { path, code } = entry.result;
+                    files[path.startsWith("/") ? path : "/" + path] = code;
+                } else {
+                    console.warn(`[AI] File ${entry.file.path} failed in round ${round}: ${entry.error?.message || entry.error}`);
+                    failedFiles.push(entry.file)
                 }
-            },
-            { concurrency: MAX_CONCURRENCY },
-        )
-
-        const failedFiles = [];
-        for (const entry of results) {
-            if (entry.success) {
-                const { path, code } = entry.result;
-                files[path.startsWith("/") ? path : "/" + path] = code;
-            } else {
-                console.warn(`[AI] File ${entry.file.path} failed in round ${round}: ${entry.error?.message || entry.error}`);
-                failedFiles.push(entry.file)
             }
-        }
-        pendingFiles = failedFiles;
-    }
-
-    if (pendingFiles.length > 0) {
-        const failedPaths = pendingFiles.map((f) => f.path).join(", ");
-        console.error(`[AI] Failed to generate ${pendingFiles.length} files after all retry rounds: ${failedPaths}`);
-
-        if (pendingFiles.some((f) => f.path === "/App.js")) {
-            const ext = file.path.split(".").pop()?.toLowerCase();
-
-            if (ext === "css") {
-                files[file.path] = `/* ${file.description} — Generation failed, please retry */\n`
-            } else {
-                files[file.path] = "import React from 'react';\n\n" +
-                    `// ⚠️ This file could not be generated. Please retry.\n` +
-                    `// Purpose: ${file.description}\n\n` +
-                    "export default function Placeholder() {\n" +
-                    "  return (\n" +
-                    "    <div className='p-8 text-center text-zinc-400'>\n" +
-                    "      <p>⚠️ Component failed to generate. Please try again.</p>\n" +
-                    "    </div>\n" +
-                    "  );\n" +
-                    "}\n";
-            }
+            pendingFiles = failedFiles;
         }
 
-    }
+        if (pendingFiles.length > 0) {
+            const failedPaths = pendingFiles.map((f) => f.path).join(", ");
+            console.error(`[AI] Failed to generate ${pendingFiles.length} files after all retry rounds: ${failedPaths}`);
 
-    if (!files["/App.js"]) {
-        throw new Error("AI did not generate /App.js entry point");
-    }
+            if (pendingFiles.some((f) => f.path === "/App.js")) {
+                const ext = f.path.split(".").pop()?.toLowerCase();
 
-    return { files, description: plan.projectDescription }
+                if (ext === "css") {
+                    files[f.path] = `/* ${f.description} — Generation failed, please retry */\n`
+                } else {
+                    files[file.path] = "import React from 'react';\n\n" +
+                        `// ⚠️ This file could not be generated. Please retry.\n` +
+                        `// Purpose: ${f.description}\n\n` +
+                        "export default function Placeholder() {\n" +
+                        "  return (\n" +
+                        "    <div className='p-8 text-center text-zinc-400'>\n" +
+                        "      <p>⚠️ Component failed to generate. Please try again.</p>\n" +
+                        "    </div>\n" +
+                        "  );\n" +
+                        "}\n";
+                }
+            }
+
+        }
+
+        if (!files["/App.js"]) {
+            throw new Error("AI did not generate /App.js entry point");
+        }
+
+        return { files, description: plan.projectDescription }
+    } catch (error) {
+        console.error("AI ERROR:", error);
+        throw error;
+    }
 }
 
 export async function reviseProject(prompt, manifest, relevantFiles, recentMessages) {

@@ -60,7 +60,7 @@ export const registerController = async (req, res) => {
     // Generate JWT
     const token = jwt.sign(
       {
-        id: user._id,
+        id: user._id.toString(),
         name:user.name
       },
       process.env.JWT_SECRET_KEY,
@@ -117,7 +117,7 @@ export const loginController = async (req, res) => {
       });
     }
 
-    // Compare Password
+    // Compare Password   
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -130,7 +130,7 @@ export const loginController = async (req, res) => {
     // Generate JWT Token
     const token = jwt.sign(
       {
-        id: user._id,
+        id: user._id.toString(),
         name:user.name
       },
       process.env.JWT_SECRET_KEY,

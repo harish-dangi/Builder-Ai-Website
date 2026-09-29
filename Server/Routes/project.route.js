@@ -1,5 +1,5 @@
 import express from "express";
-import { createProjectController, runBackgroundGeneration, updateProjectController, deleteProjectController, publishProjectController, getPublishedProjectController, getAllProjectsController, getProjectByIdController } from "../Controllers/project.controller.js";
+import { createProjectController, updateProjectController, deleteProjectController, publishProjectController, getPublishedProjectController, getAllProjectsController, getProjectByIdController } from "../Controllers/project.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { chat } from "../Controllers/chat.controller.js";
 

@@ -1,9 +1,9 @@
-import { FileCode, FileText } from "lucide-react";
+import { FileCode, FileText,Folder,Files } from "lucide-react";
 import {useMemo} from "react";
 
 function buildTree(paths) {
   const root = [];
-  for (const filePath of paths.sort()) {
+  for (const filePath of [...paths].sort()) {
     const parts = filePath.split("/").filter(Boolean);
     let currentLevel = root;
     for (let i = 0; i < parts.length; i++) {
@@ -15,11 +15,14 @@ function buildTree(paths) {
         existingNode = {
           name: part,
           children: [],
-          path: fullpath,
+          // Directories use their display path. Files must retain the exact
+          // Sandpack key (including its leading slash) when selected.
+          path: isFile ? filePath : fullpath,
           isDir: !isFile,
         };
         currentLevel.push(existingNode);
       }
+      // console.log("Clicked file:", node.path);
       currentLevel = existingNode.children;
     }
   }
@@ -45,11 +48,11 @@ const getFileIcon = (fileName) => {
 
 function TreeItem({ node, activeFile, onFileSelect, depth = 0 }) {
 const isActive = node.path === activeFile;
- 
+//  console.log("node:",node);
 if(node.isDir){
   return (
     <div key={node.path} className="ml-2">
-      <div className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-100 cursor-pointer">
+      <div className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-100/20 cursor-pointer">
         <Folder size={17} />
         <span className=" truncate">{node.name}</span>
       </div>
@@ -63,7 +66,7 @@ if(node.isDir){
 return (
   <button
     key={node.path}
-    className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-100 cursor-pointer ${isActive ? "bg-zinc-200" : ""}`}
+    className={`flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-zinc-100/20 cursor-pointer ${isActive ? "bg-zinc-200" : ""}`}
     onClick={() => onFileSelect(node.path)}
   >
     {getFileIcon(node.name)}
@@ -71,24 +74,65 @@ return (
   </button>
 );
 }
+
+
 const FilePanel = ({ files, activeFile, onFileSelect }) => {
   const tree = useMemo(() => {
-    return buildTree(Object.keys(files));
+    return buildTree(Object.keys(files || {}));
   }, [files]);
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Header */}
-      <div className="shrink-0 px-4 py-3 border-b border-zinc-200">
+    <div className="h-full flex flex-col bg-[#0d1117] text-zinc-300">
+
+      {/* ================= HEADER ================= */}
+      <div className="shrink-0 px-4 py-3 border-b border-white/10">
+
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-zinc-900">Files</h2>
-          {tree?.map((node) => (
-            <TreeItem key={node.path} node={node} activeFile={activeFile} onFileSelect={onFileSelect} />
-          ))}
+          {/* Left */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center w-7 h-7 rounded-md bg-white/5 border border-white/10">
+              <Files size={15} className="text-zinc-400" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold text-zinc-100">
+                Files
+              </h2>
+              <p className="text-[10px] text-zinc-500">
+                {Object.keys(files || {}).length} files
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+      {/* ================= FILE TREE ================= */}
+      <div className="flex-1 overflow-y-auto px-2 py-3">
+        {tree?.length > 0 ? (
+          <div className="space-y-0.5">
+            {tree.map((node) => (
+              <TreeItem key={node.path} node={node} activeFile={activeFile}
+                onFileSelect={onFileSelect} />
+            ))}
+          </div>
+        ) : (
+          /* Empty State */
+          <div className="h-full flex flex-col items-center justify-center text-center px-6">
+
+            <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-3">
+              <Files size={22} className="text-zinc-600" />
+            </div>
+
+            <p className="text-sm text-zinc-400"> No files yet</p>
+            <p className="text-xs text-zinc-600 mt-1">
+              Generate your website to see files here
+            </p>
+          </div>
+        )}
+
       </div>
     </div>
   );
 };
+
+
 
 export default FilePanel;

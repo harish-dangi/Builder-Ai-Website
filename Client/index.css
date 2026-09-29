@@ -71,6 +71,19 @@ body {
   height: 100% !important;
 }
 
+/* Builder preview: Sandpack defaults each panel to a fixed height. */
+.builder-sandpack,
+.builder-sandpack > .sp-stack,
+.builder-sandpack .sp-preview-container,
+.builder-sandpack .sp-preview-iframe {
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.builder-sandpack > .sp-stack {
+  flex: 1 1 0 !important;
+}
+
 /* Marquee styles */
 @keyframes marquee {
   0% { transform: translateX(0); }

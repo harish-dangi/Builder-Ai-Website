@@ -6,6 +6,14 @@ export function hashContent(content) {
 
 // Apply AI file operations (create, update, delete) to project files
 export function applyOperations(currentFiles, operations) {
+    const result = applyOperations(currentFiles, operations);
+
+    console.log("========== REVISION RESULT ==========");
+    console.log("result:",result)
+    console.log("Applied:", result.applied);
+    console.log("Errors:", result.errors);
+    console.log("Updated App.js:", result.files["/App.js"]);
+    console.log("=====================================");
     const files = { ...currentFiles };
     const applied = [];
     const errors = [];
@@ -13,89 +21,144 @@ export function applyOperations(currentFiles, operations) {
     for (const op of operations) {
         try {
             switch (op.op) {
+                // ==========================================
+                // CREATE
+                // ==========================================
                 case "create": {
-                    if (!op.content) {
+                    if (typeof op.content !== "string") {
                         errors.push(`create ${op.path}: missing content`);
                         break;
                     }
-                    files[op.path] = {
-                        content: op.content,
-                        hash: hashContent(op.content),
-                    };
+
+                    files[op.path] = op.content;
+
                     applied.push(`created ${op.path}`);
                     break;
                 }
 
+                // ==========================================
+                // UPDATE
+                // ==========================================
                 case "update": {
                     const existing = files[op.path];
-                    if (!existing) {
+
+                    if (existing === undefined) {
                         errors.push(`update ${op.path}: file not found`);
                         break;
                     }
-                    if (!op.search || op.replace == null) {
-                        errors.push(`update ${op.path}: missing search/replace`);
+
+                    if (typeof existing !== "string") {
+                        errors.push(
+                            `update ${op.path}: existing file content is not a string`,
+                        );
                         break;
                     }
 
-                    const newContent = searchReplace(existing.content, op.search, op.replace);
+                    if (typeof op.search !== "string") {
+                        errors.push(`update ${op.path}: missing search`);
+                        break;
+                    }
+
+                    if (typeof op.replace !== "string") {
+                        errors.push(`update ${op.path}: missing replace`);
+                        break;
+                    }
+
+                    const newContent = searchReplace(existing, op.search, op.replace);
 
                     if (newContent === null) {
                         errors.push(`update ${op.path}: search string not found`);
                         break;
                     }
 
-                    files[op.path] = {
-                        content: newContent,
-                        hash: hashContent(newContent),
-                    };
+                    files[op.path] = newContent;
+
                     applied.push(`updated ${op.path}`);
+
                     break;
                 }
 
+                // ==========================================
+                // DELETE
+                // ==========================================
                 case "delete": {
-                    if (files[op.path]) {
+                    if (files[op.path] !== undefined) {
                         delete files[op.path];
+
                         applied.push(`deleted ${op.path}`);
                     } else {
                         errors.push(`delete ${op.path}: file not found`);
                     }
+
                     break;
                 }
 
-                default:
+                // ==========================================
+                // UNKNOWN OPERATION
+                // ==========================================
+                default: {
                     errors.push(`unknown op: ${op.op}`);
+                }
             }
         } catch (err) {
+            console.error("[Diff] Operation failed:", op, err);
+
             errors.push(`${op.op} ${op.path}: ${err.message}`);
         }
     }
 
-    return { files, applied, errors };
+    return {
+        files,
+        applied,
+        errors,
+    };
 }
 
-// Search and replace code with fallback whitespace normalization matching
+// ==========================================================
+// SEARCH + REPLACE
+// ==========================================================
+
 function searchReplace(content, search, replace) {
-    // 1. Try exact match
+    // Safety check
+    if (typeof content !== "string") {
+        throw new Error("searchReplace: content must be a string");
+    }
+
+    if (typeof search !== "string") {
+        throw new Error("searchReplace: search must be a string");
+    }
+
+    if (typeof replace !== "string") {
+        throw new Error("searchReplace: replace must be a string");
+    }
+
+    // ==========================================
+    // 1. EXACT MATCH
+    // ==========================================
+
     if (content.includes(search)) {
         return content.replace(search, () => replace);
     }
 
-    // 2. Try with normalized whitespace (collapse multiple spaces/tabs, trim lines)
-    const normalizeWs = (s) =>
-        s
+    // ==========================================
+    // 2. NORMALIZE WHITESPACE
+    // ==========================================
+
+    const normalizeWs = (text) =>
+        text
             .split("\n")
             .map((line) => line.replace(/\s+/g, " ").trim())
             .join("\n")
             .trim();
 
     const normalizedContent = normalizeWs(content);
+
     const normalizedSearch = normalizeWs(search);
 
     if (normalizedContent.includes(normalizedSearch)) {
-        // Find the original substring by matching line-by-line
         const searchLines = normalizedSearch.split("\n");
-        const contentLines = content.split("\n");
 
+        const contentLines = content.split("\n");
         for (let i = 0; i <= contentLines.length - searchLines.length; i++) {
             let match = true;
             for (let j = 0; j < searchLines.length; j++) {
@@ -111,6 +174,5 @@ function searchReplace(content, search, replace) {
             }
         }
     }
-
     return null;
 }

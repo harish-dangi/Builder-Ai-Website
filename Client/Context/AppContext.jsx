@@ -1,4 +1,4 @@
-import  {createContext,useCallback,useEffect, useState,} from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import axios from "axios";
@@ -13,17 +13,17 @@ export const AppContextProvider = ({ children }) => {
   const navigate = useNavigate();
   const [user, setUser] = useState();
   const [loadingUser, setLoadingUser] = useState(true);
-  
-  //states
-  const [projects,setProjects] = useState([]);
-  const [loadingProjects,setloadingProjects] = useState(true);
 
-  const [activeProject, setActiveProject] = useState(null);
-  const [loadingActiveProject,setloadingActiveProject] = useState(true);
-  const [chatLoading,setChatLoading] = useState(false);
-  const [generatingProjects,setGeneratingProjects] = useState(false);
-  const [activeFile,setactiveFile] = useState("/App.js");
-  const [showCode,setshowCode] = useState(false);
+  //states
+  const [projects, setProjects] = useState([]);
+  const [loadingProjects, setloadingProjects] = useState(true);
+
+  const [activeProject, setActiveProject] = useState();
+  const [loadingActiveProject, setloadingActiveProject] = useState(true);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [generatingProjects, setGeneratingProjects] = useState(false);
+const [activeFile, setActiveFile] = useState("/App.js");
+  const [showCode, setshowCode] = useState(false);
 
   //Auth Action
   const checkSession = useCallback(async () => {
@@ -31,6 +31,7 @@ export const AppContextProvider = ({ children }) => {
       const { data } = await axios.get("http://localhost:4000/api/auth/getme", {
         withCredentials: true,
       });
+      // console.log("user:",data);
       setUser(data.user);
     } catch (err) {
       setUser(null);
@@ -45,7 +46,9 @@ export const AppContextProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const { data } = await axios.post( "http://localhost:4000/api/auth/login",{ email,password},
+      const { data } = await axios.post(
+        "http://localhost:4000/api/auth/login",
+        { email, password },
         { withCredentials: true },
       );
       setUser(data.user);
@@ -60,7 +63,9 @@ export const AppContextProvider = ({ children }) => {
 
   const register = async (name, email, password) => {
     try {
-      await axios.post("http://localhost:4000/api/auth/register",{name,email,password},
+      await axios.post(
+        "http://localhost:4000/api/auth/register",
+        { name, email, password },
         { withCredentials: true },
       );
       toast.success("Welcome Back!");
@@ -74,166 +79,224 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
-  const logout = async ()=>{
-    try{
-      await axios.get( "http://localhost:4000/api/auth/logout");
+  const logout = async () => {
+    try {
+      await axios.get("http://localhost:4000/api/auth/logout", {
+        withCredentials: true,
+      });
+
       setUser(null);
       toast.success("Logged out successfully!");
       navigate("/login");
-    }catch(err){
-      console.error("Logout Failed:",err);
-      toast.error("Logout Failed.");
+    } catch (err) {
+      console.error("Logout Failed:", err);
     }
-  }
+  };
   //Projects Action
-  const loadProjects = async ()=> {
-    if(!user) return;
-    try{
-      const {data} = await axios.get("http://localhost:4000/api/projects",{withCredentials:true});
-      setProjects(data);
-    }catch(err){
-      console.error("Failed to list projects:",err);
+  const loadProjects = async () => {
+    if (!user) return;
+    try {
+      const { data } = await axios.get("http://localhost:4000/api/projects", {
+        withCredentials: true,
+      });
+      setProjects(data.projects);
+    } catch (err) {
+      console.error("Failed to list projects:", err);
       toast.error("Failed to load projects list");
-    }finally{
+    } finally {
       setloadingProjects(false);
     }
-  }
+  };
 
-  const loadProject = async(id, silent = false)=>{
-    if(!user) return;
-    if(!silent) setloadingActiveProjects(true);
+  // ye abhi check karna hai
+  const loadProject = async (id, silent = false) => {
+    if (!user) return;
+    if (!silent) setloadingActiveProject(true);
 
-    try{
-      const {data} = await axios.get(`http://localhost:4000/api/projects/${id}`);
+    try {
+      const { data } = await axios.get(
+        `http://localhost:4000/api/projects/${id}`,
+        { withCredentials: true },
+      );
       setActiveProject(data);
-      //Default file selection
-      const files = Object.keys(data.files);
-      if(files.length > 0){
-        setactiveFile((prev)=>{
-          if(files.includes(prev)) return prev;
-          if(files.includes("/App.js")) return "/App.js";
+      const files = Object.keys(data?.files || {});
+
+      if (files.length > 0) {
+        setActiveFile((prev) => {
+          if (files.includes(prev)) return prev;
+          if (files.includes("/App.js")) return "/App.js";
           return files[0];
-        })
+        });
       }
-    }catch(err){
-      console.error("Failed to load projects:",err);
-      if(!silent){
-        toast.error("Failed to load projects details");
-        navigate("/")
-      }
-    }finally{
-      if(!silent) setloadingActiveProjects(false);
+    } catch (err) {
+      console.error("❌ LOAD PROJECT ERROR:", err);
+    } finally {
+      if (!silent) setloadingActiveProject(false);
     }
-  }
+  };
 
   //Automatically poll active project status if generating or pending
-  useEffect(()=>{
-    if(!activeProject?._id || !user) return;
-    const isOngoing = activeProject.status === "generating" || activeProject.status === "pending" || activeProject.status === "revising";
+  useEffect(() => {
+    if (!activeProject?._id || !user) return;
+    const isOngoing =
+      activeProject.status === "generating" ||
+      activeProject.status === "pending" ||
+      activeProject.status === "revising";
 
-    if(isOngoing){
+    if (isOngoing) {
       setChatLoading(true);
       const interval = setInterval(() => {
-        loadProject(activeProject._id,true);
+        loadProject(activeProject._id, true);
       }, 2000);
-      return ()=> clearInterval(interval);
-    }else{
+      return () => clearInterval(interval);
+    } else {
       setChatLoading(false);
     }
-  },[activeProject?._id,activeProject?.status,loadProject,user]);
+  }, [
+    activeProject?.project._id,
+    activeProject?.project.status,
+    loadProject,
+    user,
+  ]);
 
-  const handleGenerate = useCallback(async (prompt)=>{
-    if(!user) return;
-    setGeneratingProjects(true);
-    try{
-      const {data} = await axios.post("http://localhost:4000/api/projects",{prompt});
-      toast.success("Ai Agent is planning structure...");
-      navigate(`/builder/${data._id}`);
-    }catch(err){
-      console.error("Failed to generate projects:",err);
-      toast.error(err?.response?.data?.error || "Failed to generate project");
-    }finally{
-      setGeneratingProjects(false);
+  const handleGenerate = useCallback(
+    async (prompt) => {
+      if (!user) return;
+      setGeneratingProjects(true);
+      try {
+        const { data } = await axios.post(
+          "http://localhost:4000/api/projects",
+          { prompt },
+          {
+            withCredentials: true,
+          },
+        );
+        toast.success("Ai Agent is planning structure...");
+        console.log("CREATED PROJECT RESPONSE:", data);
+        navigate(`/builder/${data.project?._id}`);
+      } catch (err) {
+        console.error("Failed to generate projects:", err);
+        toast.error(err?.response?.data?.error || "Failed to generate project");
+      } finally {
+        setGeneratingProjects(false);
+      }
+    },
+    [navigate, user],
+  );
+
+  const handleDelete = useCallback(
+    async (id) => {
+      if (!user) return;
+      setGeneratingProjects(true);
+
+      try {
+        await axios.delete(`http://localhost:4000/api/projects/${id}`);
+        setProjects((prev) => prev.filter((p) => p._id !== id));
+        toast.success("Project deleted successfully!");
+      } catch (err) {
+        console.error("Failed to delete projects:", err);
+        toast.error(err?.response?.data?.error || "Failed to delete project");
+      }
+    },
+    [user],
+  );
+
+const handleChat = useCallback(
+  async (prompt) => {
+
+    if (!user || !activeProject?.project) {
+      console.log("RETURN: user or project missing");
+      return;
     }
-  },[navigate,user]);
 
-    const handleDelete = useCallback(async (id)=>{
-    if(!user) return;
-    setGeneratingProjects(true);
-
-    try{
-      await axios.delete(`http://localhost:4000/api/projects/${id}`);
-      setProjects((prev)=>prev.filter((p)=> p._id !== id ));
-      toast.success("Project deleted successfully!");
-    }catch(err){
-      console.error("Failed to delete projects:",err);
-      toast.error(err?.response?.data?.error || "Failed to delete project");
-    }
-  },[user]);
-
-  const handleChat = useCallback(async (prompt)=>{
-    if(!user || !activeProject) return;
     setChatLoading(true);
-    try{
-      const {data} = await axios.post(`http://localhost:4000/api/projects/${activeProject._id}/chat`,{prompt});
+
+    try {
+      const { data } = await axios.post(
+        `http://localhost:4000/api/projects/${activeProject.project._id}/chat`,
+        { prompt },
+        { withCredentials: true }
+      );
+
       setActiveProject(data);
-      if(data.errors && data.errors.length > 0){
-        toast.error(`${data.errors.length} revisions patch failed. Please check the chat for details.`);
-      }else{
+      if (data.errors && data.errors.length > 0) {
+        toast.error(
+          `${data.errors.length} revisions patch failed. Please check the chat for details.`
+        );
+      } else {
         toast.success(`Updated to version ${data.version} successfully!`);
       }
-    }catch(err){
-      console.error("Failed to chat with AI:",err);
-      toast.error(err?.response?.data?.error || "Failed to chat with AI");
-    }finally{
+    } catch (err) {
+      console.log("Message:", err?.message);
+      toast.error(
+        err?.response?.data?.error || "Failed to chat with AI"
+      );
+    } finally {
       setChatLoading(false);
     }
-  },[user, activeProject]);
+  },
+  [user, activeProject]
+);
 
-  const debounceSave = useMemo(() => debounce(async (projectId, files) => {
-    try {
-      await axios.put(`http://localhost:4000/api/projects/${projectId}/files`, { files });
-    } catch (err) {
-      console.error("Failed to save project files:", err);
-      toast.error(err?.response?.data?.error || "Failed to save project files");
-    }
-  }, 1000), []);
+  const debounceSave = useMemo(() =>
+    debounce(async (projectId, files) => {
+      try {
+        await axios.put(
+          `http://localhost:4000/api/projects/${projectId}`,
+          { files },
+          {
+            withCredentials: true,
+          },
+        );
+      } catch (err) {
+        console.log("PUT ERROR:", err);
+        console.log("STATUS:", err?.response?.status);
+        console.log("DATA:", err?.response?.data);
+      }
+    }, 1000),
+  [] );
 
   useEffect(() => {
-   return () => {
-      debounceSave.cancel();
-    }
-  }, [ debounceSave]);
+    return () => {
+      debounceSave.flush();
+    };
+  }, [debounceSave]);
 
-  const updateProjectFiles = useCallback(( files) => {
-    if (!activeProject || !user) return;
-    debounceSave(activeProject._id, files);
-  }, [activeProject, user, debounceSave]);
+  const updateProjectFiles = useCallback(
+    (files) => {
+      // console.log("projectnumber:",activeProject)
+      if (!activeProject || !user) return;
+      debounceSave(activeProject?.project._id, files);
+    },
+    [activeProject, user, debounceSave],
+  );
 
   return (
-    <AppContext.Provider value={{ 
-      user, 
-      loadingUser, 
-      login, 
-      logout,
-      register,
-      projects,
-      loadingProjects,
-      activeProject,
-      loadingActiveProject,
-      chatLoading,
-      generatingProjects,
-      activeFile,
-      setactiveFile,
-      showCode,
-      setshowCode,
-      handleDelete,
-      handleGenerate,
-      loadProject,
-      loadProjects,
-      handleChat,
-      updateProjectFiles
-      }}>
+    <AppContext.Provider
+      value={{
+        user,
+        loadingUser,
+        login,
+        logout,
+        register,
+        projects,
+        loadingProjects,
+        activeProject,
+        loadingActiveProject,
+        chatLoading,
+        generatingProjects,
+        activeFile,
+        setActiveFile,
+        showCode,
+        setshowCode,
+        handleDelete,
+        handleGenerate,
+        loadProject,
+        loadProjects,
+        handleChat,
+        updateProjectFiles,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

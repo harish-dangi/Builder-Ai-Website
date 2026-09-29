@@ -14,6 +14,17 @@ export async function exportProjectZip(project) {
             const fileCode = typeof content === "string" ? content : content?.content || "";
             fileMap[path] = fileCode;
         }
+
+        // Tailwind is compiled by Vite/PostCSS in the exported project. The
+        // builder's own dependencies are not available to the downloaded app.
+        const tailwindDirectives = "@tailwind base;\n@tailwind components;\n@tailwind utilities;\n\n";
+        const stylesPath = "/styles.css";
+        const styles = fileMap[stylesPath] || "";
+        if (!styles.includes("@tailwind base") && !styles.includes('@import "tailwindcss"')) {
+            const imports = styles.match(/^(?:\s*@import\s+[^;]+;\s*)+/)?.[0] || "";
+            fileMap[stylesPath] = `${imports}${tailwindDirectives}${styles.slice(imports.length)}`;
+        }
+
         const detectedDeps = detectDependencies(fileMap);
 
         // Add package.json
@@ -72,6 +83,31 @@ export default defineConfig({
 `,
         );
 
+        // Configure Tailwind v3 to scan all generated React files.
+        zip.file(
+            "tailwind.config.js",
+            `/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
+`,
+        );
+
+        zip.file(
+            "postcss.config.js",
+            `export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};
+`,
+        );
+
         // Add index.html
         zip.file(
             "index.html",
@@ -81,7 +117,6 @@ export default defineConfig({
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${project.name || "My Website"}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
   <div id="root"></div>

@@ -1,4 +1,6 @@
-import {ProjectModel} from "../Model/Project.model.js";
+import { ProjectModel } from "../Model/Project.model.js";
+import mongoose from "mongoose";
+import { generateProject } from "../Services/ai.js";
 /**
  * @description: create a new project from an AI prompt.
  * @route: POST /api/projects
@@ -8,8 +10,8 @@ import {ProjectModel} from "../Model/Project.model.js";
 export const createProjectController = async (req, res) => {
   try {
     const { prompt } = req.body;
-    const userId = req.user._id;
-    if (!prompt || !typeof prompt === "string" || prompt.trim() === "") {
+    const userId = req.user.id;
+    if (!prompt || typeof prompt !== "string" || prompt.trim() === "") {
       return res.status(400).json({
         success: false,
         message: "Prompt is required",
@@ -26,7 +28,7 @@ export const createProjectController = async (req, res) => {
           content: prompt,
         },
         {
-          role: "assistant", 
+          role: "assistant",
           content: "Planning project structure and files...",
         }
       ],
@@ -40,10 +42,10 @@ export const createProjectController = async (req, res) => {
     });
 
     // Run background generation process
-    runBackgroundGeneration(Project._id.toString(), prompt)                                            
-    .catch((error) => {
-      console.error("Background generation error:", error);
-    } );
+    runBackgroundGeneration(Project._id.toString(), prompt)
+      .catch((error) => {
+        console.error("Background generation error:", error);
+      });
 
     return res.status(201).json({
       success: true,
@@ -60,13 +62,13 @@ export const createProjectController = async (req, res) => {
         filesPlanned: Project.filesPlanned,
         filesGenerated: Project.filesGenerated,
         currentFile: Project.currentFile,
-        error: Project.error, 
+        error: Project.error,
         createdAt: Project.createdAt,
         updatedAt: Project.updatedAt,
       },
     });
-    
-  }catch (error) {
+
+  } catch (error) {
     console.error(error);
     return res.status(500).json({
       success: false,
@@ -82,8 +84,8 @@ export const createProjectController = async (req, res) => {
 */
 export const getAllProjectsController = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const projects = await ProjectModel.find({ owner: userId }).sort({ createdAt: -1 });
+    // const userId = req.user.id;
+    const projects = await ProjectModel.find().sort({ createdAt: -1 });
     return res.status(200).json({
       success: true,
       message: "Projects fetched successfully",
@@ -106,8 +108,10 @@ export const getAllProjectsController = async (req, res) => {
 */
 export const getProjectByIdController = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const projectId = req.params.id;
+    const userId = req.user.id;
+    // console.log('userId:',userId)
+    const projectId = req.params.projectId;
+    // console.log("ProjectID:",projectId);
     if (!userId) {
       return res.status(400).json({
         success: false,
@@ -115,15 +119,16 @@ export const getProjectByIdController = async (req, res) => {
       });
     }
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
-    return res.status(400).json({
+      return res.status(400).json({
         success: false,
         message: "Invalid Project Id"
+      });
+    }
+    const project = await ProjectModel.findById({
+      _id: projectId
     });
-}
-    const project = await ProjectModel.findOne({
-    _id: projectId,
-    owner: userId
-});
+    // console.log("project",project);
+
     if (!project) {
       return res.status(404).json({
         success: false,
@@ -132,7 +137,7 @@ export const getProjectByIdController = async (req, res) => {
     }
 
     const filesObj = {};
-    for(const [path,entry] of Object.entries(project.files)) {
+    for (const [path, entry] of Object.entries(project.files)) {
       filesObj[path] = entry.content;
     }
 
@@ -157,15 +162,25 @@ export const getProjectByIdController = async (req, res) => {
  * @route: POST /api/projects/:id/generate
  * @access: Private
  */
-export const runBackgroundGeneration = async (projectId, prompt) => {
+export async function runBackgroundGeneration(projectId, prompt) {
   try {
-    // Fetch the project from the database using the projectId
-    const project = await ProjectModel.findById(projectId);
+    const result = await generateProject(prompt);
+    console.log("result", result)
+    const updateProject = await ProjectModel.findByIdAndUpdate(projectId, {
+      files: result.files,
+      description: result.description,
+      status: "completed",
+      version: 1,
+      error: null
+    }, { new: true });
+    console.log("updateProject", updateProject)
   } catch (error) {
-    console.error(error);
+    await ProjectModel.findByIdAndUpdate(projectId, {
+      status: "failed",
+      error: error.message
+    });
   }
 }
-
 
 /**
  * @description: Update a project's status and files.
@@ -174,15 +189,27 @@ export const runBackgroundGeneration = async (projectId, prompt) => {
  */
 export const updateProjectController = async (req, res) => {
   try {
-    const projectId = req.params.id;
-    const userId = req.user._id;
-    const {  files } = req.body;
-    if(!mongoose.Types.ObjectId.isValid(projectId)) {
+    const projectId = req.params.projectId;
+    const userId = req.user.id;
+    const { files } = req.body;
+
+    console.log("PROJECT ID:", projectId);
+    console.log("USER ID:", userId);
+
+    // 1. Sirf ID se project find karo
+    const projectById = await ProjectModel.findById(projectId);
+
+    console.log("PROJECT BY ID:", projectById);
+    console.log("PROJECT OWNER:", projectById?.owner);
+    console.log("CURRENT USER:", userId);
+
+    if (!mongoose.Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid Project Id"
+        message: "Invalid Project Id",
       });
     }
+
     if (!files || typeof files !== "object") {
       return res.status(400).json({
         success: false,
@@ -190,19 +217,39 @@ export const updateProjectController = async (req, res) => {
       });
     }
 
-    const project = await ProjectModel.findOneAndUpdate(
-      { _id: projectId, owner: userId },
-      { $set: { files } },
-      { new: true }
-    );
-    if (!project) {
+    if (!projectById) {
       return res.status(404).json({
         success: false,
-        message: "Project not found",
+        message: "Project does not exist",
       });
     }
+
+    // 2. Ab owner check karo
+    if (projectById.owner.toString() !== userId.toString()) {
+      console.log("OWNER DOES NOT MATCH");
+
+      return res.status(403).json({
+        success: false,
+        message: "You are not the owner of this project",
+      });
+    }
+
+    // 3. Update
+    projectById.files = files;
+
+    const updatedProject = await projectById.save();
+
+    console.log("UPDATED PROJECT:", updatedProject);
+
+    return res.status(200).json({
+      success: true,
+      message: "Project updated successfully",
+      project: updatedProject,
+    });
+
   } catch (error) {
-    console.error(error);
+    console.error("UPDATE ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
@@ -211,15 +258,13 @@ export const updateProjectController = async (req, res) => {
   }
 };
 
-
 /**
  * @description: Delete a project by ID.
  * @route: DELETE /api/projects/:id
  * @access: Private
  */
-
 export const deleteProjectController = async (req, res) => {
-  try { 
+  try {
     const projectId = req.params.id;
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({
@@ -227,8 +272,8 @@ export const deleteProjectController = async (req, res) => {
         message: "Invalid Project Id"
       });
     }
-    const userId = req.user._id;
-    const result = await ProjectModel.findByIdAndDelete( { _id: projectId, owner: userId });
+    const userId = req.user.id;
+    const result = await ProjectModel.findByIdAndDelete({ _id: projectId, owner: userId });
     if (!result) {
       return res.status(404).json({
         success: false,
@@ -257,18 +302,28 @@ export const deleteProjectController = async (req, res) => {
 */
 export const publishProjectController = async (req, res) => {
   try {
-    const projectId = req.params.id;
+    const projectId = req.params.projectId;
+    const userID = req.user.id
+      if (!userID) {
+      return res.status(400).json({
+        success: false,
+        message: "Unauthenticated User",
+      });
+    }
+  
     const project = await ProjectModel.findOneAndUpdate(
-      { _id: projectId, owner: req.user._id },
+      { _id: projectId},
       { published: true },
       { returnDocument: "after" }
     );
+
     if (!project) {
       return res.status(404).json({
         success: false,
         message: "Project not found",
       });
     }
+    // console.log(project.published)
     return res.status(200).json({
       success: true,
       message: "Project published successfully",
@@ -292,31 +347,33 @@ export const publishProjectController = async (req, res) => {
 */
 export const getPublishedProjectController = async (req, res) => {
   try {
-    const projectId = req.params.id;
-    const project = await ProjectModel.findById({ _id: projectId, published: true });
+    const projectId = req.params.projectId;
+
+    console.log("Published Project ID:", projectId);
+
+    const project = await ProjectModel.findOne({
+      _id: projectId,
+      published: true,
+    });
+
     if (!project) {
       return res.status(404).json({
         success: false,
-        message: "Project not found or not published",
+        message: "Published project not found",
       });
     }
-    const filesObj = {};
-    for(const [path,entry] of Object.entries(project.files)) {
-      filesObj[path] = entry.content;
-    }
+
     return res.status(200).json({
       success: true,
-      message: "Project fetched successfully",
       project,
-      files: filesObj,
     });
-  }
-  catch (error) {
-    console.error(error);
+  } catch (error) {
+    console.error("Get Published Project Error:", error);
+
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
       error: error.message,
     });
   }
-}
+};
