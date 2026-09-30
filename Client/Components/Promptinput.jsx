@@ -1,7 +1,7 @@
 import React, { useEffect, useRef ,useState } from "react";
-import {ArrowRightIcon,CloudUploadIcon,Loader2Icon, MicIcon,} from "lucide-react";
+import {ArrowRightIcon,CloudUploadIcon,Loader2Icon} from "lucide-react";
 
-const Promptinput = ({onSubmit,loading = false, placeholder = "Describe the website you want to build....",     large = false, variant = "default"}) => {
+const Promptinput = ({onSubmit,loading = false, placeholder = "Describe the website you want to build....", large = false, variant = "default"}) => {
   const [value, setValue] = useState("");
   const textareaRef = useRef(null);
 
@@ -43,10 +43,7 @@ const Promptinput = ({onSubmit,loading = false, placeholder = "Describe the webs
             <CloudUploadIcon size={20} className=" hover:text-blue-950 text-blue-200 cursor-pointer "/>
           </label>
           <div className=" flex gap-3">  
-            <button type="button" >
-              <MicIcon size={20} className=" hover:text-blue-950 text-blue-200 cursor-pointer " />
-            </button>
-            <button type= "submit" className="hover:text-blue-950  text-blue-200  cursor-pointer" disabled={!value.trim() || loading}> 
+            <button type= "submit" className="hover:text-blue-950  text-blue-200  cursor-pointer" disabled={!value.trim() || loading} onClick={handleSubmit}> 
               {loading ? (
                 <Loader2Icon size={20}  className=" animate-spin"/>
               ) : (

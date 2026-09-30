@@ -12,22 +12,14 @@ import { useAppContext } from "../Context/AppContext.jsx";
 
 const emptyFunction = () => {};
 
-// ======================================================
 // SANDBOX FILE WATCHER
-// ======================================================
-
 const SandpackFileWatcher = ({ onLiveFilesChange = emptyFunction }) => {
   const { sandpack } = useSandpack();
   const { files } = sandpack;
-
   const { activeProject } = useAppContext();
-  console.log("DB FILES:", activeProject?.project?.files);
-
   const activeProjectRef = useRef(activeProject);
   const onLiveFilesChangeRef = useRef(onLiveFilesChange);
-
   const lastSentFilesRef = useRef("");
-
   useEffect(() => {
     activeProjectRef.current = activeProject;
     lastSentFilesRef.current = "";
@@ -43,17 +35,12 @@ const SandpackFileWatcher = ({ onLiveFilesChange = emptyFunction }) => {
     if (!project || !files) {
       return;
     }
-
     const updatedFiles = {};
     let hasChanges = false;
 
     for (const [path, file] of Object.entries(files)) {
       const fileCode = file?.code ?? "";
-
-      updatedFiles[path] = fileCode;
-
       const originalFile = project.files?.[path];
-
       const originalContent =
         typeof originalFile === "string"
           ? originalFile
@@ -75,7 +62,6 @@ const SandpackFileWatcher = ({ onLiveFilesChange = emptyFunction }) => {
     }
 
     lastSentFilesRef.current = filesSignature;
-
     onLiveFilesChangeRef.current(updatedFiles);
   }, [files]);
 
@@ -88,9 +74,7 @@ const SandpackFileWatcher = ({ onLiveFilesChange = emptyFunction }) => {
 
 const SandpackActiveFileSync = ({ activeFile }) => {
   const { sandpack } = useSandpack();
-
   const currentActiveFile = sandpack.activeFile;
-
   useEffect(() => {
     if (!activeFile) return;
 
@@ -104,34 +88,9 @@ const SandpackActiveFileSync = ({ activeFile }) => {
 
     sandpack.setActiveFile(activeFile);
   }, [activeFile, currentActiveFile, sandpack.files, sandpack.setActiveFile]);
-
   return null;
 };
 
-
-// const SandpackScrollToTop = () => {
-//   const { sandpack } = useSandpack();
-
-//   useEffect(() => {
-//     const timer = setTimeout(() => {
-//       const iframe = document.querySelector(
-//         ".sp-preview-iframe"
-//       );
-
-//       if (iframe?.contentWindow) {
-//         iframe.contentWindow.scrollTo(0, 0);
-//       }
-//     }, 500);
-
-//     return () => clearTimeout(timer);
-//   }, [sandpack]);
-
-//   return null;
-// };
-
-// ======================================================
-// PREVIEW PANEL
-// ======================================================
 
 const PreviewPanel = ({
   projectData,

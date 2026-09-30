@@ -22,29 +22,29 @@ export const BuildManifest = (files) => {
 export const chat = async (req, res) => {
   const { prompt } = req.body;
   const userId = req.user.id;
-  console.log(prompt + userId)
+  // console.log(prompt + userId)
   if (!prompt || typeof prompt !== "string") {
     return res.status(404).json({
       message: "prompt not found"
     })
   }
-
-  const project = await ProjectModel.findOne({ _id: req.params.id, owner: userId });
+  console.log("after the findone")
+  const project = await ProjectModel.findOne({ _id: req.params.id });
+  console.log("projcet", project)
   if (!project) {
     return res.status(404).json({
       message: "Project not found"
     })
   }
-
   //set status to revising and save user prompt immedaitely
   project.status = "generating",
-  project.messages.push({
-    role: "user", content: prompt, timestamp: new Date()
-  });
+    project.messages.push({
+      role: "user", content: prompt, timestamp: new Date()
+    });
   await project.save();
   console.log("after try catch block")
   try {
-  console.log("before try  block")
+    console.log("before try  block")
 
     //Build compact manifest (path + hash + size) instead of sending all code
     const manifest = BuildManifest(project.files);
@@ -52,8 +52,8 @@ export const chat = async (req, res) => {
 
     //includes all file contents so the ai can accurate search/replace
     const relevantFiles = {};
-    for (const [path, entry] of Object.entries(project.files)) {
-      relevantFiles[path] = entry.content;
+    for (const [path, content] of Object.entries(project.files)) {
+      relevantFiles[path] = content;
     }
     //Recent messages for context (last 4 max)
     const recentMessages = project.messages.slice(-4).map((m) => ({
@@ -68,7 +68,7 @@ export const chat = async (req, res) => {
 
     //Apply operation to file map
     const { files: updatedFiles, applied, errors } = applyOperations(project.files, result.operations)
-  
+
     if (errors.length > 0) {
       console.warn(`[Diff] Errors applying operations:`, errors)
     }
@@ -86,8 +86,8 @@ export const chat = async (req, res) => {
 
     //Return updated projcet
     const filesObj = {};
-    for (const [path, entry] of Object.entries(project.files)) {
-      filesObj[path] = entry.content;
+    for (const [path, content] of Object.entries(project.files)) {
+      filesObj[path] = content;
     }
 
     return res.status(200).json({

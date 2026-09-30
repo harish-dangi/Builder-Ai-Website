@@ -22,7 +22,7 @@ export const AppContextProvider = ({ children }) => {
   const [loadingActiveProject, setloadingActiveProject] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
   const [generatingProjects, setGeneratingProjects] = useState(false);
-const [activeFile, setActiveFile] = useState("/App.js");
+  const [activeFile, setActiveFile] = useState("/App.js");
   const [showCode, setshowCode] = useState(false);
 
   //Auth Action
@@ -80,7 +80,7 @@ const [activeFile, setActiveFile] = useState("/App.js");
   };
 
   const logout = async () => {
-    console.log("call logout")
+    console.log("call logout");
     try {
       await axios.get("http://localhost:4000/api/auth/logout", {
         withCredentials: true,
@@ -119,7 +119,13 @@ const [activeFile, setActiveFile] = useState("/App.js");
         `http://localhost:4000/api/projects/${id}`,
         { withCredentials: true },
       );
+      console.log("⏰ LOAD PROJECT TIME:", new Date().toISOString());
+      console.log("PROJECT LOADED FROM SERVER:", data);
+      console.log("FILES FROM SERVER:", Object.keys(data.project.files));
+      console.log("APP.JS FROM SERVER:", data.project.files["/App.js"]);
       setActiveProject(data);
+
+      console.log("✅ ACTIVE PROJECT UPDATED");
       const files = Object.keys(data?.files || {});
 
       if (files.length > 0) {
@@ -202,76 +208,79 @@ const [activeFile, setActiveFile] = useState("/App.js");
     [user],
   );
 
-const handleChat = useCallback(
-  async (prompt) => {
-    console.log("chat call")
-    if (!user || !activeProject?.project) {
-      console.log("RETURN: user or project missing");
-      return;
-    }
-
-    setChatLoading(true);
-
-    try {
-      const { data } = await axios.post(
-        `http://localhost:4000/api/projects/${activeProject.project._id}/chat`,
-        { prompt },
-        { withCredentials: true }
-      );
-
-      setActiveProject(data);
-      if (data.errors && data.errors.length > 0) {
-        toast.error(
-          `${data.errors.length} revisions patch failed. Please check the chat for details.`
-        );
-      } else {
-        toast.success(`Updated to version ${data.version} successfully!`);
+  const handleChat = useCallback(
+    async (prompt) => {
+      console.log("chat call");
+      if (!user || !activeProject?.project) {
+        console.log("RETURN: user or project missing");
+        return;
       }
-    } catch (err) {
-      console.log("Message:", err?.message);
-      toast.error(
-        err?.response?.data?.error || "Failed to chat with AI"
-      );
-    } finally {
-      setChatLoading(false);
-    }
-  },
-  [user, activeProject]
-);
-
-  const debounceSave = useMemo(() =>
-    debounce(async (projectId, files) => {
+      setChatLoading(true);
       try {
-        await axios.put(
-          `http://localhost:4000/api/projects/${projectId}`,
-          { files },
-          {
-            withCredentials: true,
-          },
+        console.log("chat call inside try");
+        console.log(activeProject.project._id);
+        const { data } = await axios.post(
+          `http://localhost:4000/api/projects/${activeProject.project._id}/chat`,
+          { prompt },
+          { withCredentials: true },
         );
+        setActiveProject(data);
+        if (data.errors && data.errors.length > 0) {
+          toast.error(
+            `${data.errors.length} revisions patch failed. Please check the chat for details.`,
+          );
+        } else {
+          toast.success(`Updated to version ${data.version} successfully!`);
+        }
       } catch (err) {
-        console.log("PUT ERROR:", err);
-        console.log("STATUS:", err?.response?.status);
-        console.log("DATA:", err?.response?.data);
-      }
-    }, 1000),
-  [] );
+        console.log("chat call inside catch");
 
-  useEffect(() => {
-    return () => {
-      debounceSave.flush();
-    };
-  }, [debounceSave]);
+        console.log("Message:", err?.message);
+        toast.error(err?.response?.data?.error || "Failed to chat with AI");
+      } finally {
+        setChatLoading(false);
+      }
+    },
+    [user, activeProject],
+  );
+
+  const debounceSave = useMemo(
+    () =>
+      debounce(async (projectId, files) => {
+        try {
+          await axios.put(
+            `http://localhost:4000/api/projects/${projectId}`,
+            { files },
+            {
+              withCredentials: true,
+            },
+          );
+        } catch (err) {
+          console.log("PUT ERROR:", err);
+          console.log("STATUS:", err?.response?.status);
+          console.log("DATA:", err?.response?.data);
+        }
+      }, 1000),
+    [],
+  );
+
+  // useEffect(() => {
+  //   return () => {
+  //     debounceSave.flush();
+  //   };
+  // }, [debounceSave]);
 
   const updateProjectFiles = useCallback(
     (files) => {
-      // console.log("projectnumber:",activeProject)
+      console.log("🔥 updateProjectFiles CALLED");
+      console.log("🔥 files being saved:", files);
+
       if (!activeProject || !user) return;
-      debounceSave(activeProject?.project._id, files);
+
+      debounceSave(activeProject.project._id, files);
     },
     [activeProject, user, debounceSave],
   );
-
   return (
     <AppContext.Provider
       value={{

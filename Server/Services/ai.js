@@ -54,13 +54,7 @@ async function generateSingleFile(
     alreadyGeneratedFiles
   );
 
-  const userMsg = `
-Project: ${prompt}
-
-Write the complete code for: ${file.path}
-
-Purpose: ${file.description}
-`;
+  const userMsg = `Project: ${prompt} Write the complete code for: ${file.path} Purpose: ${file.description}`;
 
   const { object } = await generateObject({
     model,
@@ -114,7 +108,6 @@ export async function generateProject(prompt, callbacks) {
         });
         console.log("PLAN GENERATED:");
         console.log(plan)
-
 
         if (!plan.files.find((f) => f.path === "/App.js")) {
             plan.files.unshift({

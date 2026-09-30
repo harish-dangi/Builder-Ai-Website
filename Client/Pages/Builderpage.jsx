@@ -99,12 +99,13 @@ const Builderpage = () => {
         onPublish={handlePublish}
       />
       {/* Main Layout */}
-      <div className="mt-2 flex gap-3 overflow-hidden ">
+      <div className="mt-2 flex min-h-0 flex-1 gap-3 overflow-hidden">
         {/* Left Layout */}
-        <div className="flex  min-h-0 shrink-0 flex-col">
+        {/* Left Layout */}
+        <div className="flex h-full min-h-0 w-98.75 min-w-98.75 max-w-98.75 shrink-0 flex-col overflow-hidden">
           {/* Tabs Container */}
 
-          <div className="flex items-center gap-1 p-1 rounded-xl w-full justify-between border border-zinc-200">
+          <div className="flex w-full shrink-0 items-center justify-between gap-1 rounded-xl border border-zinc-200 p-1">
             {/* Chat Tab */}
             <button
               onClick={() => setLeftTab("chat")}
@@ -133,8 +134,8 @@ const Builderpage = () => {
             </button>
           </div>
 
-          <div className="flex-1 ">
-            <div className="h-full border border-zinc-200 rounded-2xl bg-white shadow-sm overflow-hidden">
+          <div className="min-h-0 flex-1 overflow-hidden">
+            <div className="h-full min-h-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
               {leftTab === "chat" ? (
                 <ChatPanel
                   messages={activeProject?.project.messages || []}
@@ -156,17 +157,18 @@ const Builderpage = () => {
         </div>
         {/* right layout */}
         {/* preview page / code area */}
-        <div className="flex  min-h-0 min-w-0 w-full overflow-hidden  ">
+        <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
           {activeProject?.project.status === "pending" ||
           activeProject?.project.status === "generating" ||
           activeProject?.project.status === "failed" ? (
             <AgentProgressDashboard />
           ) : (
-            <PreviewPanel 
+            <PreviewPanel
               projectData={activeProject?.project}
               sandpackFiles={activeProject?.project?.files || {}}
               activeFile={activeFile}
               showcode={showCode}
+              onActiveFileChange={setActiveFile}
             />
           )}
         </div>
