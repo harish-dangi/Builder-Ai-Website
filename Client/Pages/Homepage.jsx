@@ -54,11 +54,7 @@ const Homepage = () => {
         <div className="flex gap-3 items-center">
           <p>{user?.name}</p>
 
-          <button
-            onClick={logout}
-            className="border rounded-2xl py-2 px-2 bg-amber-200/30  mr-3  
-        cursor-pointer"
-          >
+          <button onClick={logout}  className="border rounded-2xl py-2 px-2 bg-amber-200/30  mr-3  cursor-pointer" >
             Sign out
           </button>
         </div>
@@ -114,16 +110,7 @@ const Homepage = () => {
                       Your Projects
                     </h2>
 
-                    <span
-                      className="
-            inline-flex items-center justify-center
-            min-w-7 h-7 px-2
-            rounded-full
-            bg-zinc-900
-            text-white
-            text-xs font-semibold
-          "
-                    >
+                    <span className=" inline-flex items-center justify-center  min-w-7 h-7 px-2 rounded-full bg-zinc-900  text-white  text-xs font-semibold " >
                       {projects.length}
                     </span>
                   </div>
@@ -212,65 +199,19 @@ const Homepage = () => {
                       <div className="flex items-center gap-4 min-w-0">
                         {/* Icon */}
                         <div
-                          className="
-                flex
-                h-12
-                w-12
-                shrink-0
-                items-center
-                justify-center
-                rounded-xl
-
-                bg-gradient-to-br
-                from-indigo-500
-                via-violet-500
-                to-fuchsia-500
-
-                shadow-lg
-                shadow-indigo-500/20
-
-                transition-transform
-                duration-300
-                group-hover:scale-105
-              "
+                          className="  flex  h-12  w-12 shrink-0 items-center  justify-center rounded-xl  bg-linear-to-br from-indigo-500 via-violet-500 to-fuchsia-500 shadow-lg shadow-indigo-500/20 transition-transform duration-300 group-hover:scale-105 "
                         >
-                          <div
-                            className="
-                  h-5
-                  w-5
-                  rounded-md
-                  border-2
-                  border-white/90
-                  rotate-3
-                "
+                          <div  className=" h-5  w-5  rounded-md  border-2  border-white/90 rotate-3 "
                           />
                         </div>
 
                         {/* Name */}
                         <div className="min-w-0">
-                          <h3
-                            className="
-                  truncate
-                  text-sm
-                  font-semibold
-                  text-zinc-900
-
-                  transition-colors
-                  duration-200
-
-                  group-hover:text-indigo-600
-                "
-                          >
+                          <h3 className="  truncate  text-sm font-semibold text-zinc-900  transition-colors  duration-200  group-hover:text-indigo-600 " >
                             {p.name || "Untitled Project"}
                           </h3>
 
-                          <p
-                            className="
-                  mt-1
-                  text-xs
-                  text-zinc-400
-                "
-                          >
+                          <p className=" mt-1 text-xs text-zinc-400 ">
                             Website project
                           </p>
                         </div>
@@ -278,63 +219,19 @@ const Homepage = () => {
 
                       {/* Arrow */}
                       <div
-                        className="
-              flex
-              h-9
-              w-9
-              shrink-0
-              items-center
-              justify-center
-
-              rounded-lg
-              border
-              border-zinc-200
-              bg-zinc-50
-
-              text-zinc-400
-
-              transition-all
-              duration-300
-
-              group-hover:border-indigo-200
-              group-hover:bg-indigo-50
-              group-hover:text-indigo-600
-              group-hover:translate-x-1
-            "
-                      >
+                        className=" flex h-9 w-9 shrink-0 items-center justify-center  rounded-lg border border-zinc-200 bg-zinc-50 text-zinc-400 transition-all  duration-300  group-hover:border-indigo-200  group-hover:bg-indigo-50 group-hover:text-indigo-600 group-hover:translate-x-1 "
+                        >
                         <ArrowRightIcon size={15} />
                       </div>
                     </div>
 
                     {/* ================= DIVIDER ================= */}
-                    <div
-                      className="
-            relative
-            my-5
-            h-px
-            bg-zinc-100
-          "
-                    />
+                    <div  className="  relative my-5 h-px bg-zinc-100"/>
 
                     {/* ================= BOTTOM ================= */}
-                    <div
-                      className="
-            relative
-            flex
-            items-center
-            justify-between
-          "
-                    >
+                    <div className="  relative   flex items-center  justify-between " >
                       {/* Metadata */}
-                      <div
-                        className="
-              flex
-              items-center
-              gap-4
-              text-xs
-              text-zinc-400
-            "
-                      >
+                      <div  className="  flex items-center  gap-4 text-xs  text-zinc-400 ">
                         {/* Updated */}
                         <span className="flex items-center gap-1.5">
                           <ClockIcon size={12} />
@@ -345,81 +242,28 @@ const Homepage = () => {
                         </span>
 
                         {/* Divider */}
-                        <span
-                          className="
-                h-1
-                w-1
-                rounded-full
-                bg-zinc-300
-              "
-                        />
+                        <span  className=" h-1 w-1 rounded-full bg-zinc-300 " />
 
                         {/* Version */}
                         <span
-                          className="
-                rounded-md
-                bg-zinc-100
-                px-2
-                py-1
-                font-medium
-                text-zinc-500
-              "
-                        >
+                          className="  rounded-md bg-zinc-100 px-2 py-1 font-medium text-zinc-500">
                           v{p.version || 1}
                         </span>
                       </div>
 
                       {/* Delete */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
+                      <button onClick={(e) => {
+                         e.stopPropagation();
                           handleDelete(p._id);
                         }}
-                        className="
-                flex
-                h-8
-                w-8
-                items-center
-                justify-center
-
-                rounded-lg
-
-                text-zinc-300
-
-                transition-all
-                duration-200
-
-                hover:bg-red-50
-                hover:text-red-500
-
-                active:scale-90
-              "
-                        title="Delete project"
-                      >
+                        className=" flex h-8 w-8 items-center justify-center rounded-lg text-zinc-300 transition-all duration-200 hover:bg-red-50 hover:text-red-500 active:scale-90 "
+                        title="Delete project"  >
                         <Trash2Icon size={14} />
                       </button>
                     </div>
 
                     {/* ================= HOVER LINE ================= */}
-                    <div
-                      className="
-            absolute
-            bottom-0
-            left-0
-            h-[2px]
-            w-0
-
-            bg-gradient-to-r
-            from-indigo-500
-            via-violet-500
-            to-fuchsia-500
-
-            transition-all
-            duration-500
-
-            group-hover:w-full
-          "
-                    />
+                    <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-linear-to-r from-indigo-500 via-violet-500 to-fuchsia-500 transition-all duration-500 group-hover:w-full"/>
                   </div>
                 ))}
               </div>

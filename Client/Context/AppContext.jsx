@@ -80,6 +80,7 @@ const [activeFile, setActiveFile] = useState("/App.js");
   };
 
   const logout = async () => {
+    console.log("call logout")
     try {
       await axios.get("http://localhost:4000/api/auth/logout", {
         withCredentials: true,
@@ -203,7 +204,7 @@ const [activeFile, setActiveFile] = useState("/App.js");
 
 const handleChat = useCallback(
   async (prompt) => {
-
+    console.log("chat call")
     if (!user || !activeProject?.project) {
       console.log("RETURN: user or project missing");
       return;

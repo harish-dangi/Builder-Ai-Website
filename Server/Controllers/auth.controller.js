@@ -169,13 +169,18 @@ export const loginController = async (req, res) => {
 };
 
 export const logoutController = async (req, res) => {
+  console.log("logout function call")
   try {
+  console.log("logout function call inside try block")
+
     res.clearCookie("token");
     return res.status(200).json({
       success: true,
       message: "Logout Successfully",
     });
   } catch (error) {
+  console.log("logout function call inside catch block")
+
     return res.status(500).json({
       success: false,
       message: "Logout Failed",

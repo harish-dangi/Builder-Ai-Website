@@ -93,8 +93,8 @@ const Builderpage = () => {
         publishing={publishing}
         onToggleShowCode={() => setshowCode(!showCode)}
         onOpenPreview={handleOpenPreview}
-        onBagout={logout}
-        onDowck={() => navigate("/")}
+        onLogout={logout}
+        onBack={() => navigate("/")}
         onDownload={handleDownload}
         onPublish={handlePublish}
       />
