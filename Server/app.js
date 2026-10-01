@@ -10,9 +10,25 @@ app.use(cookieParser());
 
 app.use(express.json());
 
+const allowedOrigins = [
+    "http://localhost:5173",
+    "https://builder-ai-website.vercel.app/"
+];
+
 app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
+    origin: function (origin, callback) {
+        // Postman/server-to-server requests ke liye
+        if (!origin) {
+            return callback(null, true);
+        }
+
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+
+        return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true
 }));
 /**
 * all routes here
