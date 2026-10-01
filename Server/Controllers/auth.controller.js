@@ -4,14 +4,13 @@ import bcrypt from "bcrypt";
 
 export const registerController = async (req, res) => {
   try {
-
     const { name, email, password } = req.body;
 
     // Empty validation
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Name, Email and Password are required."
+        message: "Name, Email and Password are required.",
       });
     }
 
@@ -21,7 +20,7 @@ export const registerController = async (req, res) => {
     if (!emailRegex.test(email)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid Email Format."
+        message: "Invalid Email Format.",
       });
     }
 
@@ -33,7 +32,7 @@ export const registerController = async (req, res) => {
       return res.status(400).json({
         success: false,
         message:
-          "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character."
+          "Password must contain at least 8 characters, one uppercase, one lowercase, one number and one special character.",
       });
     }
 
@@ -43,7 +42,7 @@ export const registerController = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        message: "User already exists."
+        message: "User already exists.",
       });
     }
 
@@ -54,26 +53,26 @@ export const registerController = async (req, res) => {
     const user = await UserModel.create({
       name,
       email,
-      password: hashedPassword
+      password: hashedPassword,
     });
-    console.log(user)
+    // console.log(user)
     // Generate JWT
     const token = jwt.sign(
       {
         id: user._id.toString(),
-        name:user.name
+        name: user.name,
       },
       process.env.JWT_SECRET_KEY,
       {
-        expiresIn: "7d"
-      }
+        expiresIn: "7d",
+      },
     );
     // Save Token in Cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return res.status(201).json({
       success: true,
@@ -81,29 +80,27 @@ export const registerController = async (req, res) => {
       user: {
         _id: user._id,
         name: user.name,
-        email: user.email
-      }
+        email: user.email,
+      },
     });
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: "Internal Server Error",
     });
   }
 };
 
 export const loginController = async (req, res) => {
   try {
-
     const { email, password } = req.body;
 
     // Empty Validation
     if (!email || !password) {
       return res.status(400).json({
         success: false,
-        message: "Email and Password are required."
+        message: "Email and Password are required.",
       });
     }
 
@@ -113,17 +110,17 @@ export const loginController = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "User not found."
+        message: "User not found.",
       });
     }
 
-    // Compare Password   
+    // Compare Password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invalid Password."
+        message: "Invalid Password.",
       });
     }
 
@@ -131,22 +128,21 @@ export const loginController = async (req, res) => {
     const token = jwt.sign(
       {
         id: user._id.toString(),
-        name:user.name
+        name: user.name,
       },
       process.env.JWT_SECRET_KEY,
       {
-        expiresIn: "7d"
-      }
+        expiresIn: "7d",
+      },
     );
 
     // Store Token in Cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,      // true in production (HTTPS)
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
     return res.status(200).json({
       success: true,
       message: "Login Successfully",
@@ -154,24 +150,23 @@ export const loginController = async (req, res) => {
       user: {
         _id: user._id,
         name: user.name,
-        email: user.email
-      }
+        email: user.email,
+      },
     });
-
   } catch (err) {
     console.error(err);
 
     return res.status(500).json({
       success: false,
-      message: "Internal Server Error"
+      message: "Internal Server Error",
     });
   }
 };
 
 export const logoutController = async (req, res) => {
-  console.log("logout function call")
+  console.log("logout function call");
   try {
-  console.log("logout function call inside try block")
+    console.log("logout function call inside try block");
 
     res.clearCookie("token");
     return res.status(200).json({
@@ -179,7 +174,7 @@ export const logoutController = async (req, res) => {
       message: "Logout Successfully",
     });
   } catch (error) {
-  console.log("logout function call inside catch block")
+    console.log("logout function call inside catch block");
 
     return res.status(500).json({
       success: false,
@@ -192,7 +187,7 @@ export const logoutController = async (req, res) => {
 export const getMeController = async (req, res) => {
   try {
     const user = req.user;
-  
+
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -203,7 +198,7 @@ export const getMeController = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "User fetched successfully",
-      user
+      user,
     });
   } catch (error) {
     return res.status(500).json({
