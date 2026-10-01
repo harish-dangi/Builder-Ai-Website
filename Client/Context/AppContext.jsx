@@ -28,7 +28,7 @@ export const AppContextProvider = ({ children }) => {
   //Auth Action
   const checkSession = useCallback(async () => {
     try {
-      const { data } = await axios.get("http://localhost:4000/api/auth/getme", {
+      const { data } = await axios.get("https://builder-ai-website.onrender.com/api/auth/getme", {
         withCredentials: true,
       });
       // console.log("user:",data);
@@ -47,7 +47,7 @@ export const AppContextProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const { data } = await axios.post(
-        "http://localhost:4000/api/auth/login",
+        "https://builder-ai-website.onrender.com/api/auth/login",
         { email, password },
         { withCredentials: true },
       );
@@ -64,7 +64,7 @@ export const AppContextProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       await axios.post(
-        "http://localhost:4000/api/auth/register",
+        "https://builder-ai-website.onrender.com/api/auth/register",
         { name, email, password },
         { withCredentials: true },
       );
@@ -82,7 +82,7 @@ export const AppContextProvider = ({ children }) => {
   const logout = async () => {
     console.log("call logout");
     try {
-      await axios.get("http://localhost:4000/api/auth/logout", {
+      await axios.get("https://builder-ai-website.onrender.com/api/auth/logout", {
         withCredentials: true,
       });
 
@@ -97,7 +97,7 @@ export const AppContextProvider = ({ children }) => {
   const loadProjects = async () => {
     if (!user) return;
     try {
-      const { data } = await axios.get("http://localhost:4000/api/projects", {
+      const { data } = await axios.get("https://builder-ai-website.onrender.com/api/projects", {
         withCredentials: true,
       });
       setProjects(data.projects);
@@ -116,7 +116,7 @@ export const AppContextProvider = ({ children }) => {
 
     try {
       const { data } = await axios.get(
-        `http://localhost:4000/api/projects/${id}`,
+        `https://builder-ai-website.onrender.com/api/projects/${id}`,
         { withCredentials: true },
       );
       console.log("⏰ LOAD PROJECT TIME:", new Date().toISOString());
@@ -172,7 +172,7 @@ export const AppContextProvider = ({ children }) => {
       setGeneratingProjects(true);
       try {
         const { data } = await axios.post(
-          "http://localhost:4000/api/projects",
+          "https://builder-ai-website.onrender.com/api/projects",
           { prompt },
           {
             withCredentials: true,
@@ -197,7 +197,7 @@ export const AppContextProvider = ({ children }) => {
       setGeneratingProjects(true);
 
       try {
-        await axios.delete(`http://localhost:4000/api/projects/${id}`);
+        await axios.delete(`https://builder-ai-website.onrender.com/api/projects/${id}`);
         setProjects((prev) => prev.filter((p) => p._id !== id));
         toast.success("Project deleted successfully!");
       } catch (err) {
@@ -249,7 +249,7 @@ export const AppContextProvider = ({ children }) => {
       debounce(async (projectId, files) => {
         try {
           await axios.put(
-            `http://localhost:4000/api/projects/${projectId}`,
+            `https://builder-ai-website.onrender.com/api/projects/${projectId}`,
             { files },
             {
               withCredentials: true,

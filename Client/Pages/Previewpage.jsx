@@ -13,7 +13,7 @@ const PreviewPage = () => {
     const loadProject = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:4000/api/projects/${id}`,
+          `https://builder-ai-website.onrender.com/api/projects/${id}`,
           {
             withCredentials: true,
           }

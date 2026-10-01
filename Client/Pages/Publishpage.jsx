@@ -18,7 +18,7 @@ const PublishPage = () => {
         setLoading(true);
 
         const response = await axios.get(
-          `http://localhost:4000/api/projects/published/${id}`,
+          `https://builder-ai-website.onrender.com/api/projects/published/${id}`,
           {
             withCredentials: true,
           }
