@@ -12,7 +12,9 @@ app.use(express.json());
 
 const allowedOrigins = [
     "http://localhost:5173",
-    "https://builder-ai-website.vercel.app/"
+    "https://builder-ai-website.vercel.app",
+    "https://builder-ai-website-git-main-harish-6dd8.vercel.app",
+    "https://builder-ai-website-lt3nh3an3-harish-6dd8.vercel.app"
 ];
 
 app.use(cors({
