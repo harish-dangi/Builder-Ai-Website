@@ -207,7 +207,9 @@ useEffect(() => {
       try {
         console.log("delete")
         console.log
-        await axios.delete(`https://builder-ai-website.onrender.com/api/projects/${id}`);
+        await axios.delete(`https://builder-ai-website.onrender.com/api/projects/${id}`,
+          {withCredentials:true}
+        );
         setProjects((prev) => prev.filter((p) => p._id !== id));
         toast.success("Project deleted successfully!");
       } catch (err) {
