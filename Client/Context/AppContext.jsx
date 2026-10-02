@@ -110,22 +110,18 @@ export const AppContextProvider = ({ children }) => {
   };
 
   // ye abhi check karna hai
-  const loadProject = async (id, silent = false) => {
+  const loadProject = useCallback(    
+    async (id, silent = false) => {
     if (!user) return;
     if (!silent) setloadingActiveProject(true);
-
     try {
+      console.log("🔥 FETCHING PROJECTS");
       const { data } = await axios.get(
         `https://builder-ai-website.onrender.com/api/projects/${id}`,
         { withCredentials: true },
       );
-      console.log("⏰ LOAD PROJECT TIME:", new Date().toISOString());
-      console.log("PROJECT LOADED FROM SERVER:", data);
-      console.log("FILES FROM SERVER:", Object.keys(data.project.files));
-      console.log("APP.JS FROM SERVER:", data.project.files["/App.js"]);
+      console.log("🔥 PROJECT RESPONSE:", response.data);
       setActiveProject(data);
-
-      console.log("✅ ACTIVE PROJECT UPDATED");
       const files = Object.keys(data?.files || {});
 
       if (files.length > 0) {
@@ -140,7 +136,10 @@ export const AppContextProvider = ({ children }) => {
     } finally {
       if (!silent) setloadingActiveProject(false);
     }
-  };
+  }
+);
+
+
 
   //Automatically poll active project status if generating or pending
   useEffect(() => {
@@ -153,6 +152,7 @@ export const AppContextProvider = ({ children }) => {
     if (isOngoing) {
       setChatLoading(true);
       const interval = setInterval(() => {
+        
         loadProject(activeProject._id, true);
       }, 2000);
       return () => clearInterval(interval);

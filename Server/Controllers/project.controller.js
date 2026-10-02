@@ -84,23 +84,36 @@ export const createProjectController = async (req, res) => {
 */
 export const getAllProjectsController = async (req, res) => {
   try {
-    // const userId = req.user.id;
-    const projects = await ProjectModel.find().sort({ createdAt: -1 });
+
+    console.log("🔥🔥 GET ALL PROJECTS HIT 🔥🔥");
+
+    const userId = req.user.id;
+
+    console.log("LOGGED IN USER ID:", userId);
+
+    const projects = await ProjectModel
+      .find({ owner: userId })
+      .sort({ createdAt: -1 });
+
+    console.log("PROJECT COUNT:", projects.length);
+    console.log("PROJECTS:", projects);
+
     return res.status(200).json({
       success: true,
       message: "Projects fetched successfully",
       projects,
     });
+
   } catch (error) {
-    console.error(error);
+    console.error("GET ALL PROJECTS ERROR:", error);
+
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
       error: error.message,
     });
   }
-}
-
+};
 /**
  * @description: get a single project by ID.
  * @route: GET /api/projects/:id
@@ -109,25 +122,27 @@ export const getAllProjectsController = async (req, res) => {
 export const getProjectByIdController = async (req, res) => {
   try {
     const userId = req.user.id;
-    // console.log('userId:',userId)
     const projectId = req.params.projectId;
-    // console.log("ProjectID:",projectId);
+
     if (!userId) {
       return res.status(400).json({
         success: false,
         message: "Unauthenticated User",
       });
     }
+
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid Project Id"
+        message: "Invalid Project Id",
       });
     }
-    const project = await ProjectModel.findById({
-      _id: projectId
+
+    // Project ID + logged-in user dono check honge
+    const project = await ProjectModel.findOne({
+      _id: projectId,
+      owner: userId,
     });
-    // console.log("project",project);
 
     if (!project) {
       return res.status(404).json({
@@ -137,6 +152,7 @@ export const getProjectByIdController = async (req, res) => {
     }
 
     const filesObj = {};
+
     for (const [path, entry] of Object.entries(project.files)) {
       filesObj[path] = entry.content;
     }
@@ -147,15 +163,17 @@ export const getProjectByIdController = async (req, res) => {
       project,
       files: filesObj,
     });
+
   } catch (error) {
     console.error(error);
+
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
       error: error.message,
     });
   }
-}
+};
 
 /**
  * @description: Background worker to progressively generate files and update database in real time.
