@@ -25,7 +25,8 @@ const Promptinput = ({onSubmit,loading = false, placeholder = "Describe the webs
   };
   if (variant === "glass") {
     return (
-      <form className=" bg-amber-50/30 rounded-2xl p-3 md:w-90 w-70  border hover:shadow-[1px_3px_23px_1px] mt-3 duration-500 transition-all shadow-black ">
+      <div className="flex items-center justify-center">
+             <form className=" bg-amber-50/30 rounded-2xl p-3 md:w-90 w-70  border hover:shadow-[1px_3px_23px_1px] mt-3 duration-500 transition-all shadow-black ">
         <textarea 
           ref={textareaRef}
           placeholder={placeholder}
@@ -52,7 +53,9 @@ const Promptinput = ({onSubmit,loading = false, placeholder = "Describe the webs
             </button>
           </div>
         </div>
-      </form>
+      </form> 
+      </div>
+
     );
   }
 
