@@ -418,7 +418,7 @@ const Builderpage = () => {
 
   const handleOpenPreview = () => {
     if (!id) return;
-    window.open(`/preview/${id}`, "_blank");
+    window.open(`https://builder-ai-website.onrender.com/preview/${id}`, "_blank");
   };
 
   const handleDownload = () => {
