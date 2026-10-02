@@ -136,7 +136,7 @@ export default function AgentProgressDashboard({ project }) {
                 </div>
 
                 {isFailed && project.error && (
-                    <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 font-medium break-words">
+                    <div className="mb-5 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700 font-medium wrap-break-word">
                         Error: {project.error}
                     </div>
                 )}

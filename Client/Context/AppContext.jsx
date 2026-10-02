@@ -94,21 +94,25 @@ export const AppContextProvider = ({ children }) => {
     }
   };
   //Projects Action
-  const loadProjects = async () => {
-    if (!user) return;
-    try {
-      const { data } = await axios.get("https://builder-ai-website.onrender.com/api/projects", {
-        withCredentials: true,
-      });
-      setProjects(data.projects);
-    } catch (err) {
-      console.error("Failed to list projects:", err);
-      toast.error("Failed to load projects list");
-    } finally {
-      setloadingProjects(false);
-    }
-  };
+const loadProjects = useCallback(async () => {
+  if (!user) return;
 
+  try {
+    const { data } = await axios.get(
+      "https://builder-ai-website.onrender.com/api/projects",
+      {
+        withCredentials: true,
+      }
+    );
+
+    setProjects(data.projects);
+  } catch (err) {
+    console.error("Failed to list projects:", err);
+    toast.error("Failed to load projects list");
+  } finally {
+    setloadingProjects(false);
+  }
+}, [user]);
   // ye abhi check karna hai
   const loadProject = useCallback(    
     async (id, silent = false) => {
@@ -142,29 +146,33 @@ export const AppContextProvider = ({ children }) => {
 
 
   //Automatically poll active project status if generating or pending
-  useEffect(() => {
-    if (!activeProject?._id || !user) return;
-    const isOngoing =
-      activeProject.status === "generating" ||
-      activeProject.status === "pending" ||
-      activeProject.status === "revising";
+useEffect(() => {
+  if (!activeProject?._id || !user) return;
 
-    if (isOngoing) {
-      setChatLoading(true);
-      const interval = setInterval(() => {
-        
-        loadProject(activeProject._id, true);
-      }, 2000);
-      return () => clearInterval(interval);
-    } else {
-      setChatLoading(false);
-    }
-  }, [
-    activeProject?.project._id,
-    activeProject?.project.status,
-    loadProject,
-    user,
-  ]);
+  const isOngoing =
+    activeProject.status === "generating" ||
+    activeProject.status === "pending" ||
+    activeProject.status === "revising";
+
+  if (!isOngoing) {
+    setChatLoading(false);
+    return;
+  }
+
+  setChatLoading(true);
+
+  const interval = setInterval(() => {
+    loadProject(activeProject._id, true);
+  }, 2000);
+
+  return () => {
+    clearInterval(interval);
+  };
+}, [
+  activeProject?._id,
+  activeProject?.status,
+  user,
+]);
 
   const handleGenerate = useCallback(
     async (prompt) => {
@@ -197,6 +205,8 @@ export const AppContextProvider = ({ children }) => {
       setGeneratingProjects(true);
 
       try {
+        console.log("delete")
+        console.log
         await axios.delete(`https://builder-ai-website.onrender.com/api/projects/${id}`);
         setProjects((prev) => prev.filter((p) => p._id !== id));
         toast.success("Project deleted successfully!");

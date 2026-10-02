@@ -283,7 +283,7 @@ export const updateProjectController = async (req, res) => {
  */
 export const deleteProjectController = async (req, res) => {
   try {
-    const projectId = req.params.id;
+    const projectId = req.params.projectId;
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({
         success: false,
