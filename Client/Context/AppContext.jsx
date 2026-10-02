@@ -120,7 +120,7 @@ export const AppContextProvider = ({ children }) => {
         `https://builder-ai-website.onrender.com/api/projects/${id}`,
         { withCredentials: true },
       );
-      console.log("🔥 PROJECT RESPONSE:", response.data);
+      console.log("🔥 PROJECT RESPONSE:", data);
       setActiveProject(data);
       const files = Object.keys(data?.files || {});
 

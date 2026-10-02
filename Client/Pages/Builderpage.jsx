@@ -55,7 +55,7 @@ const Builderpage = () => {
     setPublishing(true);
     try {
       const response = await axios.post(
-        `http://localhost:4000/api/projects/${id}/publish`,
+        `https://builder-ai-website.onrender.com/api/projects/${id}/publish`,
         {},
         {
           withCredentials: true,
