@@ -416,11 +416,14 @@ const Builderpage = () => {
     loadProject(id);
   }, [id, user]);
 
-  const handleOpenPreview = () => {
-    if (!id) return;
-    window.open(`https://builder-ai-website.onrender.com/preview/${id}`, "_blank");
-  };
+const handleOpenPreview = () => {
+  if (!id) return;
 
+  window.open(
+    `${window.location.origin}/preview/${id}`,
+    "_blank"
+  );
+};
   const handleDownload = () => {
     if (!activeProject) return;
     exportProjectZip(activeProject.project);
