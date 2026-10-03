@@ -150,9 +150,9 @@ useEffect(() => {
   if (!activeProject?._id || !user) return;
 
   const isOngoing =
-    activeProject.status === "generating" ||
-    activeProject.status === "pending" ||
-    activeProject.status === "revising";
+    activeProject.project.status === "generating" ||
+    activeProject.project.status === "pending" ||
+    activeProject.project.status === "revising";
 
   if (!isOngoing) {
     setChatLoading(false);
@@ -162,15 +162,15 @@ useEffect(() => {
   setChatLoading(true);
 
   const interval = setInterval(() => {
-    loadProject(activeProject._id, true);
+    loadProject(activeProject.project._id, true);
   }, 2000);
 
   return () => {
     clearInterval(interval);
   };
 }, [
-  activeProject?._id,
-  activeProject?.status,
+  activeProject?.project._id,
+  activeProject?.project.status,
   user,
 ]);
 
