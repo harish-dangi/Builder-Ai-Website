@@ -480,65 +480,13 @@ const handleOpenPreview = () => {
         onPublish={handlePublish}
       />
 
-      {/* ========================================================= */}
       {/* MAIN LAYOUT */}
-      {/* ========================================================= */}
-
-      <div
-        className="
-          mt-2
-          flex
-          min-h-0
-          flex-1
-          flex-col
-          gap-3
-          overflow-y-auto
-          overflow-x-hidden
-          px-1
-          sm:px-2
-          lg:flex-row
-          lg:overflow-hidden
-        "
-      >
-        {/* ========================================================= */}
+      <div className=" mt-2  flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overflow-x-hidden px-1 sm:px-2 lg:flex-row lg:overflow-hidden ">
         {/* LEFT LAYOUT - CHAT / FILES */}
-        {/* ========================================================= */}
-
-        <div
-          className="
-            flex
-            h-[calc(100vh-3.5rem)]
-            min-h-0
-            w-full
-            min-w-0
-            shrink-0
-            flex-col
-            overflow-hidden
-
-            lg:h-full
-            lg:w-98.75
-            lg:min-w-98.75
-            lg:max-w-98.75
-          "
-        >
-          {/* ===================================================== */}
+        <div className=" flex h-[calc(100vh-3.5rem)]  min-h-0 w-full min-w-0 shrink-0 flex-col overflow-hidden lg:h-full lg:w-98.75 lg:min-w-98.75 lg:max-w-98.75 ">
           {/* TABS */}
-          {/* ===================================================== */}
-
-          <div
-            className="
-              flex
-              w-full
-              shrink-0
-              items-center
-              justify-between
-              gap-1
-              rounded-xl
-              border
-              border-zinc-200
-              p-1
-            "
-          >
+          <div className=" flex w-full shrink-0 items-center justify-between gap-1 rounded-xl border
+         border-zinc-200 p-1 ">
             {/* CHAT TAB */}
             <button
               onClick={() => setLeftTab("chat")}
@@ -566,23 +514,9 @@ const handleOpenPreview = () => {
             </button>
           </div>
 
-          {/* ===================================================== */}
           {/* CHAT / FILES CONTENT */}
-          {/* ===================================================== */}
-
           <div className="min-h-0 flex-1 overflow-hidden">
-            <div
-              className="
-                h-full
-                min-h-0
-                overflow-hidden
-                rounded-2xl
-                border
-                border-zinc-200
-                bg-white
-                shadow-sm
-              "
-            >
+            <div  className=" h-full  min-h-0 overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm ">
               {leftTab === "chat" ? (
                 <ChatPanel
                   messages={activeProject?.project.messages || []}
@@ -607,25 +541,12 @@ const handleOpenPreview = () => {
         {/* RIGHT LAYOUT - WEBSITE PREVIEW */}
         {/* ========================================================= */}
 
-        <div
-          className="
-            flex
-            min-h-screen
-            min-w-0
-            w-full
-            shrink-0
-            overflow-hidden
-
-            lg:min-h-0
-            lg:flex-1
-            lg:w-auto
-            lg:shrink
-          "
+        <div className=" flex min-h-screen min-w-0  w-full shrink-0 overflow-hidden  lg:min-h-0 lg:flex-1  lg:w-auto lg:shrink "
         >
           {activeProject?.project.status === "pending" ||
           activeProject?.project.status === "generating" ||
           activeProject?.project.status === "failed" ? (
-            <AgentProgressDashboard />
+            <AgentProgressDashboard project={activeProject.project}/>
           ) : (
             <PreviewPanel
               projectData={activeProject?.project}
@@ -638,9 +559,7 @@ const handleOpenPreview = () => {
         </div>
       </div>
 
-      {/* ========================================================= */}
       {/* PUBLISH MODAL */}
-      {/* ========================================================= */}
 
       {showPublishUrl && (
         <PublishModel

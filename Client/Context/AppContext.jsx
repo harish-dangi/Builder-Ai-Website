@@ -188,7 +188,7 @@ useEffect(() => {
           },
         );
         toast.success("Ai Agent is planning structure...");
-        console.log("CREATED PROJECT RESPONSE:", data);
+       
         navigate(`/builder/${data.project?._id}`);
       } catch (err) {
         console.error("Failed to generate projects:", err);

@@ -86,25 +86,9 @@ const handleSubmit = async (e) => {
                   Full Name
                 </label>
 
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Enter your full name"
-                  required
-                  className="
-                    w-full rounded-lg border border-zinc-200
-                    bg-white px-4 py-3
-                    text-sm text-zinc-900
-                    placeholder:text-zinc-400
-                    outline-none
-                    transition-all duration-200
-                    hover:border-zinc-300
-                    focus:border-zinc-900
-                    focus:bg-zinc-200
-                    focus:ring-2 focus:ring-zinc-900/10
-                  "
+                <input id="name"  type="text" value={name} onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your full name" required
+                  className=" w-full rounded-lg border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900  placeholder:text-zinc-400  outline-none transition-all duration-200 hover:border-zinc-300 focus:border-zinc-900 focus:bg-zinc-200  focus:ring-2 focus:ring-zinc-900/10"
                 />
               </div>
             )}
@@ -125,18 +109,7 @@ const handleSubmit = async (e) => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="
-                  w-full rounded-lg border border-zinc-200
-                  bg-white px-4 py-3
-                  text-sm text-zinc-900
-                  placeholder:text-zinc-400
-                  outline-none
-                  transition-all duration-200
-                  hover:border-zinc-300
-                  focus:border-zinc-900
-                  focus:bg-zinc-200
-                  focus:ring-2 focus:ring-zinc-900/10
-                "
+                className=" w-full rounded-lg border border-zinc-200 bg-white px-4 py-3  text-sm text-zinc-900 placeholder:text-zinc-400  outline-none transition-all duration-200 hover:border-zinc-300 focus:border-zinc-900 focus:bg-zinc-200 focus:ring-2 focus:ring-zinc-900/10 "
               />
             </div>
 
@@ -149,19 +122,7 @@ const handleSubmit = async (e) => {
                 Password
               </label>
 
-              <div
-                className="
-                  flex items-center rounded-lg
-                  border border-zinc-200
-                  bg-white
-                  transition-all duration-200
-                  hover:border-zinc-300
-                  focus-within:border-zinc-900
-                  focus-within:ring-2
-                focus:bg-zinc-200
-                focus-within:ring-zinc-900/10
-                "
-              >
+              <div className=" flex items-center rounded-lg border border-zinc-200 bg-white transition-all duration-200 hover:border-zinc-300 focus-within:border-zinc-900 focus-within:ring-2 focus:bg-zinc-200 focus-within:ring-zinc-900/10 ">
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -169,14 +130,7 @@ const handleSubmit = async (e) => {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
-                  className="
-                    w-full bg-transparent
-                    px-4 py-3
-                    text-sm text-zinc-900
-                    placeholder:text-zinc-400
-                    outline-none
-                  "
-                />
+                  className=" w-full bg-transparent  px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 outline-none " />
 
                 <button
                   type="button"
