@@ -192,7 +192,7 @@ export async function generateProject(prompt, callbacks) {
                 if (ext === "css") {
                     files[f.path] = `/* ${f.description} — Generation failed, please retry */\n`
                 } else {
-                    files[file.path] = "import React from 'react';\n\n" +
+                    files[f.path] = "import React from 'react';\n\n" +
                         `// ⚠️ This file could not be generated. Please retry.\n` +
                         `// Purpose: ${f.description}\n\n` +
                         "export default function Placeholder() {\n" +
