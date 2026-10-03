@@ -5,6 +5,7 @@ import axios from "axios";
 import { useContext } from "react";
 import { useMemo } from "react";
 import debounce from "lodash.debounce";
+import { FileArchive } from "lucide-react";
 
 export const AppContext = createContext();
 
@@ -203,10 +204,7 @@ useEffect(() => {
     async (id) => {
       if (!user) return;
       setGeneratingProjects(true);
-
       try {
-        console.log("delete")
-        console.log
         await axios.delete(`https://builder-ai-website.onrender.com/api/projects/${id}`,
           {withCredentials:true}
         );
@@ -215,6 +213,8 @@ useEffect(() => {
       } catch (err) {
         console.error("Failed to delete projects:", err);
         toast.error(err?.response?.data?.error || "Failed to delete project");
+      }finally{
+        setGeneratingProjects(false);
       }
     },
     [user],
@@ -229,8 +229,6 @@ useEffect(() => {
       }
       setChatLoading(true);
       try {
-        console.log("chat call inside try");
-        console.log(activeProject.project._id);
         const { data } = await axios.post(
           `http://localhost:4000/api/projects/${activeProject.project._id}/chat`,
           { prompt },
@@ -280,11 +278,7 @@ useEffect(() => {
 
   const updateProjectFiles = useCallback(
     (files) => {
-      console.log("🔥 updateProjectFiles CALLED");
-      console.log("🔥 files being saved:", files);
-
       if (!activeProject || !user) return;
-
       debounceSave(activeProject.project._id, files);
     },
     [activeProject, user, debounceSave],
