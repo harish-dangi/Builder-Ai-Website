@@ -153,7 +153,7 @@ const Homepage = () => {
                 {projects.map((p) => (
                   <div
                     key={p._id}
-                    onClick={() => navigate(`https://builder-ai-website.onrender.com/builder/${p._id}`)}
+                    onClick={() => navigate(`builder/${p._id}`)}
                     className="group relative cursor-pointer overflow-hidden rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-zinc-300 hover:shadow-xl sm:p-5"
                   >
                     {/* Top gradient glow */}
