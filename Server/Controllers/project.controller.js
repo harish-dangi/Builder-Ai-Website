@@ -19,7 +19,10 @@ export const createProjectController = async (req, res) => {
     }
     // Create project in the database with status "pending"
     const Project = await ProjectModel.create({
-      name: `Project - ${new Date().toISOString()}`,
+      name: `Project - ${new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      })}`,
       description: prompt,
       files: {},
       messages: [
@@ -322,15 +325,15 @@ export const publishProjectController = async (req, res) => {
   try {
     const projectId = req.params.projectId;
     const userID = req.user.id
-      if (!userID) {
+    if (!userID) {
       return res.status(400).json({
         success: false,
         message: "Unauthenticated User",
       });
     }
-  
+
     const project = await ProjectModel.findOneAndUpdate(
-      { _id: projectId},
+      { _id: projectId },
       { published: true },
       { returnDocument: "after" }
     );
