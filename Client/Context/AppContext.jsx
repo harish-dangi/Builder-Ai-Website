@@ -230,7 +230,7 @@ useEffect(() => {
       setChatLoading(true);
       try {
         const { data } = await axios.post(
-          `http://localhost:4000/api/projects/${activeProject.project._id}/chat`,
+          `https://builder-ai-website.onrender.com/api/projects/${activeProject.project._id}/chat`,
           { prompt },
           { withCredentials: true },
         );
