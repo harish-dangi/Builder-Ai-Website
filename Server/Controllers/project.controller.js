@@ -186,7 +186,6 @@ export const getProjectByIdController = async (req, res) => {
 export async function runBackgroundGeneration(projectId, prompt) {
   try {
     const result = await generateProject(prompt);
-    console.log("result", result)
     const updateProject = await ProjectModel.findByIdAndUpdate(projectId, {
       files: result.files,
       description: result.description,
@@ -194,7 +193,7 @@ export async function runBackgroundGeneration(projectId, prompt) {
       version: 1,
       error: null
     }, { new: true });
-    console.log("updateProject", updateProject)
+    //console.log("updateProject", updateProject)
   } catch (error) {
     await ProjectModel.findByIdAndUpdate(projectId, {
       status: "failed",
@@ -214,22 +213,14 @@ export const updateProjectController = async (req, res) => {
     const userId = req.user.id;
     const { files } = req.body;
 
-    console.log("PROJECT ID:", projectId);
-    console.log("USER ID:", userId);
-
     // 1. Sirf ID se project find karo
-    const projectById = await ProjectModel.findById(projectId);
-
-    console.log("PROJECT BY ID:", projectById);
-    console.log("PROJECT OWNER:", projectById?.owner);
-    console.log("CURRENT USER:", userId);
-
     if (!mongoose.Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({
         success: false,
         message: "Invalid Project Id",
       });
     }
+    const projectById = await ProjectModel.findById(projectId);
 
     if (!files || typeof files !== "object") {
       return res.status(400).json({
@@ -261,6 +252,7 @@ export const updateProjectController = async (req, res) => {
     const updatedProject = await projectById.save();
 
     console.log("UPDATED PROJECT:", updatedProject);
+
 
     return res.status(200).json({
       success: true,

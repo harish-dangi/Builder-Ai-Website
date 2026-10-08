@@ -302,18 +302,15 @@ Rules:
 - Do NOT write any code — only plan the file list`;
 
 export function buildFileCodeSystem(allFiles, alreadyGeneratedFiles) {
-  const fileList = allFiles
-    .map((f) => {
-      const impStr = f.imports && f.imports.length > 0 ? ` (Imports: ${f.imports.join(", ")})` : "";
-      const expStr = f.exports ? ` (Exports: ${f.exports})` : "";
-      return `  ${f.path}: ${f.description}${impStr}${expStr}`;
-    })
-    .join("\n");
+  const fileList = allFiles.map((f) => {
+    const impStr = f.imports && f.imports.length > 0 ? ` (Imports: ${f.imports.join(", ")})` : "";
+    const expStr = f.exports ? ` (Exports: ${f.exports})` : "";
+    return `  ${f.path}: ${f.description}${impStr}${expStr}`;
+  }).join("\n");
 
   let contextStr = "";
   if (alreadyGeneratedFiles && Object.keys(alreadyGeneratedFiles).length > 0) {
-    contextStr =
-      "\n\nCRITICAL CONTEXT — Already Generated Files:\n" +
+    contextStr = "\n\nCRITICAL CONTEXT — Already Generated Files:\n" +
       "The following files have already been generated. You MUST align your exports, imports, CSS selectors, or props signatures EXACTLY with these files:\n";
     for (const [path, code] of Object.entries(alreadyGeneratedFiles)) {
       contextStr += `\nFile: ${path}\n\`\`\`javascript\n${code}\n\`\`\`\n`;

@@ -16,44 +16,10 @@ const openrouter = createOpenAI({
 })
 
 const model = openrouter(MODEL);
-console.log("MODEL:", MODEL);
-console.log("OPENROUTER KEY LOADED:", !!process.env.OPENROUTER_API_KEY);
-// Generate a single file's code
-// async function generateSingleFile(file, allFiles, prompt, alreadyGeneratedFiles) {
-//     const system = buildFileCodeSystem(allFiles, alreadyGeneratedFiles);
-//     const userMsg = `Project: ${prompt}\n\nWrite the complete code for: ${file.path} \n Purpose: ${file.description}`;
-//     console.log(`[AI] Creating file: ${file.path}...`);
-//     const { object } = await generateObject({
-//         model,
-//         schema: FileCodeSchema,
-//         system,
-//         prompt: userMsg,
-//         maxRetries: 2,
-//     })
-//     let code = normalizeContent(object.code);
-//     if (code.trim().length === 0) {
-//         throw new Error("Generated code is empty after normalization");
-//     }
-//     // Apply post-generation validation and auto-fixing
-//     const validation = validateAndFixCode(code, file.path, { allPlannedFiles: allFiles });
-//     code = validation.code;
-//     if (validation.warnings.length > 0) {
-//         console.log(`[Validator] Code adjustments for ${file.path}:\n  - ${validation.warnings.join("\n  - ")}`);
-//     }
-//     console.log(`[AI] Created file: ${file.path} (${code.length} chars)`);
-//     return { path: file.path, code }
-// }
-async function generateSingleFile(
-  file,
-  allFiles,
-  prompt,
-  alreadyGeneratedFiles
-) {
-  const system = buildFileCodeSystem(
-    allFiles,
-    alreadyGeneratedFiles
-  );
 
+// Generate a single file's code
+async function generateSingleFile(file, allFiles, prompt, alreadyGeneratedFiles) {
+  const system = buildFileCodeSystem( allFiles,alreadyGeneratedFiles);
   const userMsg = `Project: ${prompt} Write the complete code for: ${file.path} Purpose: ${file.description}`;
 
   const { object } = await generateObject({
@@ -67,32 +33,14 @@ async function generateSingleFile(
   
   if (code.trim().length === 0) {
     throw new Error("Generated code is empty after normalization");
-  }
-
-  const validation = validateAndFixCode(
-    code,
-    file.path,
-    {
-      allPlannedFiles: allFiles
-    }
-  );
-
+  } 
+  const validation = validateAndFixCode(code,file.path,{allPlannedFiles: allFiles});
   code = validation.code;
-
   if (validation.warnings.length > 0) {
-    console.log(
-      `[Validator] Code adjustments for ${file.path}:\n  - ${validation.warnings.join("\n  - ")}`
-    );
+    console.log(`[Validator] Code adjustments for ${file.path}:\n - ${validation.warnings.join("\n - ")}`);
   }
-
-  console.log(
-    `[AI] Created file: ${file.path} (${code.length} chars)`
-  );
-
-  return {
-    path: file.path,
-    code
-  };
+  console.log( `[AI] Created file: ${file.path} (${code.length} chars)`);
+  return {path: file.path,code};
 }
 // Generate project files: plan first, then build files in order with fallback retries
 export async function generateProject(prompt, callbacks) {
@@ -148,16 +96,12 @@ export async function generateProject(prompt, callbacks) {
                 );
             }
 
-            const results = await pMap(
-                pendingFiles,
-                async (file) => {
+            const results = await pMap( pendingFiles, async (file) => {
                     try {
                         if (callbacks?.onFileStart) {
                             await callbacks.onFileStart(file.path)
                         }
-
                         const singleResult = await generateSingleFile(file, plan.files, prompt, files)
-
                         if (callbacks?.onFileComplete) {
                             await callbacks.onFileComplete(file.path, singleResult.code)
                         }
