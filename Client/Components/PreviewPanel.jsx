@@ -48,6 +48,7 @@ const SandpackFileWatcher = ({ onLiveFilesChange = emptyFunction }) => {
 
       if (originalContent !== fileCode) {
         hasChanges = true;
+        updatedFiles[path] = fileCode;
       }
     }
 
@@ -90,7 +91,6 @@ const SandpackActiveFileSync = ({ activeFile }) => {
   }, [activeFile, currentActiveFile, sandpack.files, sandpack.setActiveFile]);
   return null;
 };
-
 
 const PreviewPanel = ({
   projectData,
