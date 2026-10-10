@@ -1,6 +1,3 @@
-
-
-
 import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 import { useParams } from "react-router-dom";
@@ -23,7 +20,7 @@ const PublishPage = () => {
           `https://builder-ai-website.onrender.com/api/projects/published/${id}`,
           {
             withCredentials: true,
-          }
+          },
         );
 
         setProject(response.data.project);
@@ -54,9 +51,7 @@ const PublishPage = () => {
         <div className="text-center">
           <div className="mx-auto mb-3 h-8 w-8 rounded-full border-2 border-zinc-300 border-t-zinc-900 animate-spin" />
 
-          <p className="text-sm text-zinc-500">
-            Loading website...
-          </p>
+          <p className="text-sm text-zinc-500">Loading website...</p>
         </div>
       </div>
     );
@@ -81,13 +76,10 @@ const PublishPage = () => {
 
   return (
     <div className="min-h-screen w-full overflow-hidden bg-zinc-100">
-
       {/* Published Site Header */}
       <header className="flex h-14 w-full items-center justify-between gap-3 border-b border-zinc-200 bg-white px-3 sm:px-5">
-
         {/* Left */}
         <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-
           <div className="flex shrink-0 items-center gap-2">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
 
@@ -101,12 +93,10 @@ const PublishPage = () => {
           <h1 className="min-w-0 truncate text-sm font-medium text-zinc-900">
             {project.name || "Published Website"}
           </h1>
-
         </div>
 
         {/* Right */}
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-
           <span className="hidden sm:block text-xs text-zinc-400">
             Published website
           </span>
@@ -118,7 +108,6 @@ const PublishPage = () => {
           >
             <ExternalLink size={15} />
           </button>
-
         </div>
       </header>
 
@@ -131,7 +120,6 @@ const PublishPage = () => {
           showcode={false}
         />
       </main>
-
     </div>
   );
 };

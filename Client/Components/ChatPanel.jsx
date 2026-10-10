@@ -1,12 +1,4 @@
-
-
-import {
-  BotMessageSquareIcon,
-  MoreVertical,
-  UserIcon,
-  Sparkles,
-  MessageSquare,
-} from "lucide-react";
+import {BotMessageSquareIcon, MoreVertical, UserIcon, Sparkles, MessageSquare,} from "lucide-react";
 import { useEffect, useRef } from "react";
 import Promptinput from "../Components/Promptinput.jsx";
 
@@ -21,10 +13,7 @@ const ChatPanel = ({ messages, loading, onSend }) => {
 
   return (
     <div className="h-full w-full flex flex-col bg-white">
-      {/* ================================================= */}
       {/* HEADER */}
-      {/* ================================================= */}
-
       <div className="shrink-0 h-17 px-3 sm:px-4 border-b border-zinc-200/80 bg-white/90 backdrop-blur-xl">
         <div className="h-full flex items-center justify-between gap-2">
           {/* AI INFO */}
@@ -68,10 +57,7 @@ const ChatPanel = ({ messages, loading, onSend }) => {
         </div>
       </div>
 
-      {/* ================================================= */}
       {/* MESSAGES */}
-      {/* ================================================= */}
-
       <div className="flex-1 min-h-0 overflow-y-auto px-3 sm:px-4 py-4 sm:py-5 space-y-4 sm:space-y-5 scrollbar-thin scrollbar-thumb-zinc-200 scrollbar-track-transparent">
         {/* EMPTY STATE */}
         {(!messages || messages.length === 0) && !loading && (
@@ -156,11 +142,7 @@ const ChatPanel = ({ messages, loading, onSend }) => {
             </div>
           );
         })}
-
-        {/* ================================================= */}
         {/* AI LOADING */}
-        {/* ================================================= */}
-
         {loading && (
           <div className="flex justify-start">
             <div className="flex items-end gap-2 max-w-[94%] sm:max-w-[88%]">
@@ -199,7 +181,7 @@ const ChatPanel = ({ messages, loading, onSend }) => {
       </div>
 
       {/* INPUT */}
-      <div className="shrink-0 p-2.5 sm:p-3 border-t border-zinc-200/80 bg-white">
+
         <div className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-1 shadow-sm focus-within:border-violet-300 focus-within:ring-4 focus-within:ring-violet-50 transition-all">
           <Promptinput
             onSubmit={onSend}
@@ -213,7 +195,6 @@ const ChatPanel = ({ messages, loading, onSend }) => {
           AI can make mistakes. Review generated code before publishing.
         </p>
       </div>
-    </div>
   );
 };
 
