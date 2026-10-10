@@ -1,4 +1,10 @@
-import {BotMessageSquareIcon, MoreVertical, UserIcon, Sparkles, MessageSquare,} from "lucide-react";
+import {
+  BotMessageSquareIcon,
+  MoreVertical,
+  UserIcon,
+  Sparkles,
+  MessageSquare,
+} from "lucide-react";
 import { useEffect, useRef } from "react";
 import Promptinput from "../Components/Promptinput.jsx";
 
@@ -49,9 +55,7 @@ const ChatPanel = ({ messages, loading, onSend }) => {
           </div>
 
           {/* MENU */}
-          <button
-            className="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all cursor-pointer"
-          >
+          <button className="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-all cursor-pointer">
             <MoreVertical size={18} />
           </button>
         </div>
@@ -112,9 +116,7 @@ const ChatPanel = ({ messages, loading, onSend }) => {
 
                 {/* MESSAGE CONTENT */}
                 <div
-                  className={`min-w-0 ${
-                    isUser ? "items-end" : "items-start"
-                  }`}
+                  className={`min-w-0 ${isUser ? "items-end" : "items-start"}`}
                 >
                   {/* NAME */}
                   <p
@@ -181,20 +183,17 @@ const ChatPanel = ({ messages, loading, onSend }) => {
       </div>
 
       {/* INPUT */}
+      <Promptinput
+        onSubmit={onSend}
+        loading={loading}
+        placeholder="Ask AI to modify your website..."
+        variant="glass"
+      />
 
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50/80 p-1 shadow-sm focus-within:border-violet-300 focus-within:ring-4 focus-within:ring-violet-50 transition-all">
-          <Promptinput
-            onSubmit={onSend}
-            loading={loading}
-            placeholder="Ask AI to modify your website..."
-            variant="glass"
-          />
-        </div>
-
-        <p className="mt-2 px-2 text-center text-[10px] leading-4 text-zinc-400">
-          AI can make mistakes. Review generated code before publishing.
-        </p>
-      </div>
+      <p className="mt-2 px-2 text-center text-[10px] leading-4 text-zinc-400">
+        AI can make mistakes. Review generated code before publishing.
+      </p>
+    </div>
   );
 };
 
